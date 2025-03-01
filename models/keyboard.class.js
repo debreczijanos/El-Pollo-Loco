@@ -4,6 +4,7 @@ class Keyboard {
   RIGHT = false;
   DOWN = false;
   SPACE = false;
+  D = false;
 
   constructor() {
     this.keys = [];
