@@ -12,12 +12,19 @@ class MovableObject extends DrawableObject {
         this.y -= this.speedY;
         this.speedY -= this.acceleration;
       }
+      if (this.y >= 360) {
+        // Bodenhöhe auf 360 setzen
+        this.y = 390;
+        this.speedY = 0;
+        this.playAnimation(this.IMAGES_BOTTLE_SPLASH); // Flaschen-Splash-Animation starten
+      }
     }, 1000 / 60);
   }
 
   isAboveGround() {
-    if (this instanceof ThrowableObejct) {
-      return true;
+    if (this instanceof ThrowableObject) {
+      // Korrektur: `ThrowableObject`
+      return this.y < 360; // Jetzt stimmt der Boden für Flaschen
     } else {
       return this.y < 180;
     }
@@ -26,10 +33,10 @@ class MovableObject extends DrawableObject {
   // Bessere Formel zur Kollisionsberechnung (Genauer)
   isColliding(mo) {
     return (
-      this.x + this.width >= mo.x &&
-      this.y + this.height >= mo.y &&
-      this.x <= mo.x &&
-      this.y <= mo.y + mo.height
+      this.x + this.width * 0.8 > mo.x + mo.width * 0.2 && // Verkleinert die linke Kollisionsfläche
+      this.x + this.width * 0.2 < mo.x + mo.width * 0.8 && // Verkleinert die rechte Kollisionsfläche
+      this.y + this.height * 0.8 > mo.y + mo.height * 0.2 && // Verkleinert die obere Kollisionsfläche
+      this.y + this.height * 0.2 < mo.y + mo.height * 0.8 // Verkleinert die untere Kollisionsfläche
     );
   }
 
@@ -52,10 +59,27 @@ class MovableObject extends DrawableObject {
     return timepassed < 1;
   }
 
+  // playAnimation(images) {
+  //   let i = this.currentImage % images.length;
+  //   let path = images[i];
+  //   this.img = this.imageCache[path];
+  //   this.currentImage++;
+  // }
   playAnimation(images) {
+    if (!images || images.length === 0) {
+      console.error("Fehler: Bild-Array ist undefined oder leer!", images);
+      return;
+    }
+
     let i = this.currentImage % images.length;
     let path = images[i];
-    this.img = this.imageCache[path];
+
+    if (this.imageCache[path]) {
+      this.img = this.imageCache[path];
+    } else {
+      console.warn("Bild nicht gefunden:", path);
+    }
+
     this.currentImage++;
   }
 
