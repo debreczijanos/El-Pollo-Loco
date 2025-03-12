@@ -1,3 +1,8 @@
+let bottles = [];
+for (let i = 0; i < 20; i++) {
+  bottles.push(new Bottle());
+}
+
 const level1 = new Level(
   [new Chicken(), new Chicken(), new Chicken(), new Endboss()],
 
@@ -46,6 +51,20 @@ const level1 = new Level(
       "img/5_background/layers/1_first_layer/2.png",
       719 * 3
     ),
+
+    new BackgroundObject("img/5_background/layers/air.png", 719 * 4),
+    new BackgroundObject(
+      "img/5_background/layers/3_third_layer/1.png",
+      719 * 4
+    ),
+    new BackgroundObject(
+      "img/5_background/layers/2_second_layer/1.png",
+      719 * 4
+    ),
+    new BackgroundObject(
+      "img/5_background/layers/1_first_layer/1.png",
+      719 * 4
+    ),
   ],
   [
     new Coin(350, 100),
@@ -64,6 +83,7 @@ const level1 = new Level(
     new Coin(1700, 250),
     new Coin(1750, 200),
     new Coin(1800, 150),
-  ]
-  // [new Bottle(100, 100)]
+  ],
+  bottles
+  // [new Bottle(400, 370), new Bottle(800, 300), new Bottle(1200, 150)]
 );

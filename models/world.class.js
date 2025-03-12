@@ -26,40 +26,95 @@ class World {
   run() {
     setInterval(() => {
       this.checkCollisions();
+      // this.checkCharacterJumpOnEnemy();
       this.checkThrowableObjects();
       // Nur ausführen, wenn es noch Münzen gibt
       if (this.level.coins?.length > 0) {
         this.checkCoinCollection();
       }
+      this.checkBottleCollection(); // Hier wird geprüft, ob Bottles gesammelt werden
     }, 200);
   }
 
   checkCollisions() {
     this.level.enemies.forEach((enemy) => {
-      if (this.character.isColliding(enemy)) {
+      let characterBottom = this.character.y + this.character.height;
+      let enemyTop = enemy.y;
+      let characterCenterX = this.character.x + this.character.width / 2;
+      let enemyLeft = enemy.x;
+      let enemyRight = enemy.x + enemy.width;
+
+      // Fall 1: Charakter springt auf das Chicken → Chicken stirbt
+      if (
+        this.character.isColliding(enemy) && // Kollision vorhanden?
+        this.character.speedY < 0 && // Charakter fällt nach unten?
+        characterBottom >= enemyTop + enemy.height * 0.5 && // Muss von oben kommen
+        characterCenterX > enemyLeft &&
+        characterCenterX < enemyRight // Charakter muss über dem Gegner sein
+      ) {
+        console.log("Charakter springt auf:", enemy.constructor.name);
+        enemy.hit(); // Chicken stirbt
+        this.character.speedY = 15; // Charakter springt leicht nach oben
+      }
+
+      // Fall 2: Charakter berührt das Chicken seitlich oder von unten → Charakter verliert Leben
+      else if (this.character.isColliding(enemy)) {
         this.character.hit();
         this.statusBar.setPrecentage(this.character.energy);
       }
-
-      this.throwableObjects.forEach((bottle) => {
-        if (bottle.isColliding(enemy)) {
-          console.log("Flasche trifft Gegner!");
-          enemy.hit(); // Falls deine Gegner eine "hit()" Methode haben
-          bottle.energy = 0; // Falls du möchtest, dass die Flasche nach dem Treffer verschwindet
-        }
-      });
     });
   }
 
-  checkThrowableObjects() {
-    if (this.keyboard.D && this.throwableObjects.length < 1) {
-      let bottle = new ThrowableObject(
-        this.character.x + 100,
-        this.character.y + 100
-      );
+  // checkCollisions() {
+  //   this.level.enemies.forEach((enemy) => {
+  //     if (this.character.isColliding(enemy)) {
+  //       this.character.hit();
+  //       this.statusBar.setPrecentage(this.character.energy);
+  //     }
 
+  //     // Entfernt, weil die Kollision bereits in `checkCollisionWithEnemies()` überprüft wird
+  //   });
+  // }
+
+  // checkCharacterJumpOnEnemy() {
+  //   this.level.enemies.forEach((enemy) => {
+  //     let characterBottom = this.character.y + this.character.height; // Unterkante des Charakters
+  //     let enemyTop = enemy.y; // Oberkante des Gegners
+  //     let characterCenterX = this.character.x + this.character.width / 2;
+  //     let enemyLeft = enemy.x;
+  //     let enemyRight = enemy.x + enemy.width;
+
+  //     if (
+  //       this.character.isColliding(enemy) && // Kollision vorhanden?
+  //       this.character.speedY < 0 && // Charakter fällt nach unten?
+  //       characterBottom >= enemyTop + enemy.height * 0.5 && // Muss von oben kommen
+  //       characterCenterX > enemyLeft &&
+  //       characterCenterX < enemyRight // Charakter muss über dem Gegner sein
+  //     ) {
+  //       console.log("Charakter springt auf:", enemy.constructor.name);
+  //       enemy.hit(); // Chicken stirbt
+  //       this.character.speedY = 15; // Charakter springt leicht nach oben
+  //     }
+  //   });
+  // }
+
+  checkThrowableObjects() {
+    if (this.keyboard.D && this.character.collectedBottles > 0) {
+      let throwDirection = this.character.otherDirection ? -1 : 1;
+      let bottle = new ThrowableObject(
+        this.character.x + (throwDirection === 1 ? 100 : -10),
+        this.character.y + 130,
+        throwDirection
+      );
+      bottle.speedX = 13 * throwDirection; // Damit sich die Flasche in die richtige Richtung bewegt
       console.log("Neue Flasche erstellt:", bottle);
       this.throwableObjects.push(bottle);
+      this.character.collectedBottles--; // Nach dem Werfen eine Bottle abziehen
+
+      // Statusbar aktualisieren
+      this.statusBarBottle.setPrecentage(
+        (this.character.collectedBottles / 5) * 100
+      );
     }
   }
 
@@ -78,7 +133,7 @@ class World {
     this.addToMap(this.character);
     this.addObjectsToMap(this.level.clouds);
     this.addObjectsToMap(this.level.coins);
-    // this.addObjectsToMap(this.level.bottle);
+    this.addObjectsToMap(this.level.bottles);
 
     this.addObjectsToMap(this.level.enemies);
     this.addObjectsToMap(this.throwableObjects);
@@ -139,5 +194,22 @@ class World {
     this.statusBarCoins.setPrecentage(
       Math.min((this.character.collectedCoins / 5) * 100, 100)
     );
+  }
+
+  checkBottleCollection() {
+    if (!this.level.bottles?.length) return;
+
+    if (this.character.collectedBottles < 5) {
+      this.level.bottles = this.level.bottles.filter((bottle) => {
+        if (this.character.isColliding(bottle)) {
+          this.character.collectedBottles++; // Eine Bottle aufheben
+          this.statusBarBottle.setPrecentage(
+            (this.character.collectedBottles / 5) * 100
+          );
+          return false; // Entferne die eingesammelte Bottle
+        }
+        return true;
+      });
+    }
   }
 }

@@ -1,0 +1,22 @@
+# Betriebssystem-spezifische Dateien
+.DS_Store
+Thumbs.db
+
+# Node.js-Abhängigkeiten (falls du npm verwendest)
+node_modules/
+package-lock.json
+
+# Build- und Cache-Dateien
+dist/
+build/
+cache/
+temp/
+
+# IDE- und Editor-Dateien
+.vscode/
+.idea/
+*.iml
+
+# Persönliche Konfigurationsdateien
+*.log
+*.env
