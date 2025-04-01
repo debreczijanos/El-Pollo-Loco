@@ -3,8 +3,20 @@ for (let i = 0; i < 20; i++) {
   bottles.push(new Bottle());
 }
 
+let enemies = [];
+
+for (let i = 0; i < 8; i++) {
+  enemies.push(new Chicken());
+}
+
+for (let i = 0; i < 7; i++) {
+  enemies.push(new ChickenSmall());
+}
+
+enemies.push(new Endboss());
+
 const level1 = new Level(
-  [new Chicken(), new Chicken(), new Chicken(), new Endboss()],
+  enemies,
 
   [new Cloud()],
 
@@ -85,5 +97,4 @@ const level1 = new Level(
     new Coin(1800, 150),
   ],
   bottles
-  // [new Bottle(400, 370), new Bottle(800, 300), new Bottle(1200, 150)]
 );

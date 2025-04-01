@@ -26,7 +26,6 @@ class World {
   run() {
     setInterval(() => {
       this.checkCollisions();
-      // this.checkCharacterJumpOnEnemy();
       this.checkThrowableObjects();
       // Nur ausführen, wenn es noch Münzen gibt
       if (this.level.coins?.length > 0) {
@@ -37,30 +36,32 @@ class World {
   }
 
   checkCollisions() {
+    const charBottom = this.character.y + this.character.height;
     this.level.enemies.forEach((enemy) => {
-      let characterBottom = this.character.y + this.character.height;
-      let enemyTop = enemy.y;
-      let characterCenterX = this.character.x + this.character.width / 2;
-      let enemyLeft = enemy.x;
-      let enemyRight = enemy.x + enemy.width;
+      if (enemy.isDead || !(enemy instanceof Chicken)) return;
 
-      // Fall 1: Charakter springt auf das Chicken → Chicken stirbt
-      if (
-        this.character.isColliding(enemy) && // Kollision vorhanden?
-        this.character.speedY < 0 && // Charakter fällt nach unten?
-        characterBottom >= enemyTop + enemy.height * 0.5 && // Muss von oben kommen
-        characterCenterX > enemyLeft &&
-        characterCenterX < enemyRight // Charakter muss über dem Gegner sein
-      ) {
-        console.log("Charakter springt auf:", enemy.constructor.name);
-        enemy.hit(); // Chicken stirbt
-        this.character.speedY = 15; // Charakter springt leicht nach oben
-      }
+      // 🔍 Debug-Log
+      console.log("=== COLLISION DEBUG ===");
+      console.log({
+        speedY: this.character.speedY,
+      });
 
-      // Fall 2: Charakter berührt das Chicken seitlich oder von unten → Charakter verliert Leben
-      else if (this.character.isColliding(enemy)) {
-        this.character.hit();
-        this.statusBar.setPrecentage(this.character.energy);
+      const enemyTop = enemy.y;
+      const stompFromAbove =
+        this.character.isColliding(enemy) &&
+        this.character.speedY >= 0 &&
+        charBottom <= enemyTop + enemy.height * 0.6;
+
+      if (stompFromAbove) {
+        console.log(">>> Stomp erkannt!");
+        enemy.hit();
+        this.character.speedY = -15;
+      } else if (this.character.isColliding(enemy)) {
+        console.log(">>> Seitlicher Treffer!");
+        if (!this.character.isHurt()) {
+          this.character.hit();
+          this.statusBar.setPrecentage(this.character.energy);
+        }
       }
     });
   }
@@ -73,28 +74,6 @@ class World {
   //     }
 
   //     // Entfernt, weil die Kollision bereits in `checkCollisionWithEnemies()` überprüft wird
-  //   });
-  // }
-
-  // checkCharacterJumpOnEnemy() {
-  //   this.level.enemies.forEach((enemy) => {
-  //     let characterBottom = this.character.y + this.character.height; // Unterkante des Charakters
-  //     let enemyTop = enemy.y; // Oberkante des Gegners
-  //     let characterCenterX = this.character.x + this.character.width / 2;
-  //     let enemyLeft = enemy.x;
-  //     let enemyRight = enemy.x + enemy.width;
-
-  //     if (
-  //       this.character.isColliding(enemy) && // Kollision vorhanden?
-  //       this.character.speedY < 0 && // Charakter fällt nach unten?
-  //       characterBottom >= enemyTop + enemy.height * 0.5 && // Muss von oben kommen
-  //       characterCenterX > enemyLeft &&
-  //       characterCenterX < enemyRight // Charakter muss über dem Gegner sein
-  //     ) {
-  //       console.log("Charakter springt auf:", enemy.constructor.name);
-  //       enemy.hit(); // Chicken stirbt
-  //       this.character.speedY = 15; // Charakter springt leicht nach oben
-  //     }
   //   });
   // }
 
@@ -139,6 +118,8 @@ class World {
     this.addObjectsToMap(this.throwableObjects);
 
     this.ctx.translate(-this.camera_x, 0);
+
+    this.checkCollisions();
 
     let self = this;
     requestAnimationFrame(function () {
