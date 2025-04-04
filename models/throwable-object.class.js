@@ -79,16 +79,7 @@ class ThrowableObject extends MovableObject {
     if (this.hasSplashed) return false; // Verhindert mehrfaches Treffen
 
     for (let enemy of world.level.enemies) {
-      console.log(
-        "Überprüfe Kollision mit:",
-        enemy.constructor.name,
-        enemy.x,
-        enemy.y
-      );
-
       if (this.isColliding(enemy)) {
-        console.log("Flasche trifft:", enemy.constructor.name);
-
         clearInterval(this.moveInterval); // Stoppe die Bewegung sofort
         this.stopGravity(); // Deaktiviere die Gravitation
         this.y = enemy.y + enemy.height / 2 - this.height / 2; // Setze die Flasche auf den Gegner
@@ -98,7 +89,11 @@ class ThrowableObject extends MovableObject {
         this.loadImage(this.IMAGES_BOTTLE_SPLASH[0]); // Sofort Splash-Animation anzeigen
         this.playAnimation(this.IMAGES_BOTTLE_SPLASH);
 
-        enemy.hit(); // Gegner Schaden zufügen
+        if (enemy instanceof Endboss) {
+          enemy.takeHitFromBottle();
+        } else {
+          enemy.hit();
+        }
 
         setTimeout(() => {
           let index = world.throwableObjects.indexOf(this);

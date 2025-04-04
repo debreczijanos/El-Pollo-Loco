@@ -8,6 +8,7 @@ class World {
   statusBar = new StatusBar();
   statusBarCoins = new StatusBarCoins();
   statusBarBottle = new StatusBarBottle();
+  statusBarEndboss = new StatusBarEndboss();
   throwableObjects = [];
 
   constructor(canvas, keyboard) {
@@ -21,6 +22,8 @@ class World {
 
   setWorld() {
     this.character.world = this;
+    this.endboss = new Endboss(this.statusBarEndboss, this);
+    this.level.enemies.push(this.endboss);
   }
 
   run() {
@@ -40,12 +43,6 @@ class World {
     this.level.enemies.forEach((enemy) => {
       if (enemy.isDead || !(enemy instanceof Chicken)) return;
 
-      // 🔍 Debug-Log
-      console.log("=== COLLISION DEBUG ===");
-      console.log({
-        speedY: this.character.speedY,
-      });
-
       const enemyTop = enemy.y;
       const stompFromAbove =
         this.character.isColliding(enemy) &&
@@ -53,11 +50,9 @@ class World {
         charBottom <= enemyTop + enemy.height * 0.6;
 
       if (stompFromAbove) {
-        console.log(">>> Stomp erkannt!");
         enemy.hit();
         this.character.speedY = -15;
       } else if (this.character.isColliding(enemy)) {
-        console.log(">>> Seitlicher Treffer!");
         if (!this.character.isHurt()) {
           this.character.hit();
           this.statusBar.setPrecentage(this.character.energy);
@@ -65,17 +60,6 @@ class World {
       }
     });
   }
-
-  // checkCollisions() {
-  //   this.level.enemies.forEach((enemy) => {
-  //     if (this.character.isColliding(enemy)) {
-  //       this.character.hit();
-  //       this.statusBar.setPrecentage(this.character.energy);
-  //     }
-
-  //     // Entfernt, weil die Kollision bereits in `checkCollisionWithEnemies()` überprüft wird
-  //   });
-  // }
 
   checkThrowableObjects() {
     if (this.keyboard.D && this.character.collectedBottles > 0) {
@@ -86,7 +70,6 @@ class World {
         throwDirection
       );
       bottle.speedX = 13 * throwDirection; // Damit sich die Flasche in die richtige Richtung bewegt
-      console.log("Neue Flasche erstellt:", bottle);
       this.throwableObjects.push(bottle);
       this.character.collectedBottles--; // Nach dem Werfen eine Bottle abziehen
 
@@ -107,6 +90,7 @@ class World {
     this.addToMap(this.statusBar);
     this.addToMap(this.statusBarCoins);
     this.addToMap(this.statusBarBottle);
+    this.addToMap(this.statusBarEndboss);
     this.ctx.translate(this.camera_x, 0);
 
     this.addToMap(this.character);

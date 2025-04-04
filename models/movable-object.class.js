@@ -37,15 +37,6 @@ class MovableObject extends DrawableObject {
       this.y + this.height > obj.y &&
       this.y < obj.y + obj.height;
 
-    if (collides) {
-      console.log(
-        "✅ COLLISION detected between",
-        this.constructor.name,
-        "and",
-        obj.constructor.name
-      );
-    }
-
     return collides;
   }
 
@@ -78,12 +69,6 @@ class MovableObject extends DrawableObject {
     return timepassed < 1;
   }
 
-  // playAnimation(images) {
-  //   let i = this.currentImage % images.length;
-  //   let path = images[i];
-  //   this.img = this.imageCache[path];
-  //   this.currentImage++;
-  // }
   playAnimation(images) {
     if (!images || images.length === 0) {
       console.error("Fehler: Bild-Array ist undefined oder leer!", images);

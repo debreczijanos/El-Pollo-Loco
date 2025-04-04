@@ -1,9 +1,12 @@
 class Endboss extends MovableObject {
+  isDead = false;
+  isAttacking = false;
   height = 400;
   width = 250;
   y = 55;
   directionLeft = true;
   otherDirection = true;
+  energy = 100; // Assuming initial energy is 100
 
   IMAGES_WALKING = [
     "img/4_enemie_boss_chicken/1_walk/G1.png",
@@ -11,26 +14,224 @@ class Endboss extends MovableObject {
     "img/4_enemie_boss_chicken/1_walk/G3.png",
     "img/4_enemie_boss_chicken/1_walk/G4.png",
   ];
+  IMAGES_ALERT = [
+    "img/4_enemie_boss_chicken/2_alert/G5.png",
+    "img/4_enemie_boss_chicken/2_alert/G6.png",
+    "img/4_enemie_boss_chicken/2_alert/G7.png",
+    "img/4_enemie_boss_chicken/2_alert/G8.png",
+    "img/4_enemie_boss_chicken/2_alert/G9.png",
+    "img/4_enemie_boss_chicken/2_alert/G10.png",
+    "img/4_enemie_boss_chicken/2_alert/G11.png",
+    "img/4_enemie_boss_chicken/2_alert/G12.png",
+  ];
+  IMAGES_ATTACK = [
+    "img/4_enemie_boss_chicken/3_attack/G13.png",
+    "img/4_enemie_boss_chicken/3_attack/G14.png",
+    "img/4_enemie_boss_chicken/3_attack/G15.png",
+    "img/4_enemie_boss_chicken/3_attack/G16.png",
+    "img/4_enemie_boss_chicken/3_attack/G17.png",
+    "img/4_enemie_boss_chicken/3_attack/G18.png",
+    "img/4_enemie_boss_chicken/3_attack/G19.png",
+    "img/4_enemie_boss_chicken/3_attack/G20.png",
+  ];
+  IMAGES_DEAD = [
+    "img/4_enemie_boss_chicken/5_dead/G24.png",
+    "img/4_enemie_boss_chicken/5_dead/G25.png",
+    "img/4_enemie_boss_chicken/5_dead/G26.png",
+  ];
+  IMAGES_HURT = [
+    "img/4_enemie_boss_chicken/4_hurt/G21.png",
+    "img/4_enemie_boss_chicken/4_hurt/G22.png",
+    "img/4_enemie_boss_chicken/4_hurt/G23.png",
+  ];
 
-  constructor() {
+  constructor(statusBar, world) {
     super().loadImage(this.IMAGES_WALKING[0]);
     this.loadImages(this.IMAGES_WALKING);
+    this.loadImages(this.IMAGES_HURT);
+    this.loadImages(this.IMAGES_ATTACK);
+    this.loadImages(this.IMAGES_DEAD);
+    this.loadImages(this.IMAGES_ALERT);
+    this.statusBar = statusBar;
+    this.world = world;
     this.x = 2500;
     this.animate();
   }
 
+  takeHitFromBottle() {
+    this.hit();
+    this.statusBar.setPrecentage(this.energy);
+  }
+
+  hit() {
+    this.energy -= 20;
+    if (!this.isDead) {
+      this.playHurtAnimation();
+    }
+    if (this.energy < 0) this.energy = 0;
+    if (this.energy === 0 && !this.isDead) {
+      this.isDead = true;
+      this.playAnimation(this.IMAGES_DEAD);
+      this.animateDeath(() => {
+        this.fallDown();
+        setTimeout(() => {
+          this.height = 0;
+          this.width = 0;
+        }, 3000);
+      });
+    }
+  }
+
+  playHurtAnimation() {
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < this.IMAGES_HURT.length) {
+        this.img = this.imageCache[this.IMAGES_HURT[i]];
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 140); // Geschwindigkeit: 140ms pro Frame
+  }
+
+  playAttackAnimation() {
+    if (this.isAttacking || this.world.character.isDead()) return;
+    this.isAttacking = true;
+    let i = 0;
+    const interval = setInterval(() => {
+      if (this.world.character.isDead()) {
+        clearInterval(interval);
+        this.isAttacking = false;
+        this.playAlertAnimation(() => {
+          this.isAttacking = false;
+        });
+        return;
+      }
+      if (i < this.IMAGES_ATTACK.length) {
+        this.img = this.imageCache[this.IMAGES_ATTACK[i]];
+        i++;
+      } else {
+        clearInterval(interval);
+        this.jumpTowardsCharacter();
+      }
+    }, 100);
+  }
+
+  jumpTowardsCharacter() {
+    const char = this.world.character;
+    if (char.isDead()) {
+      this.isAttacking = false;
+      this.playAlertAnimation(() => {
+        this.isAttacking = false;
+      });
+      return;
+    }
+
+    const startX = this.x;
+    const startY = this.y;
+    const targetX = char.x + char.width / 2 - this.width / 2;
+    const targetY = char.y + char.height - this.height;
+
+    const steps = 20;
+    let step = 0;
+
+    const interval = setInterval(() => {
+      if (!char || char.isDead()) {
+        clearInterval(interval);
+        this.isAttacking = false;
+        this.playAlertAnimation(() => {
+          this.isAttacking = false;
+        });
+        return;
+      }
+
+      const t = step / steps;
+      this.x = startX + (targetX - startX) * t;
+      this.y = startY + (targetY - startY) * t - 120 * Math.sin(Math.PI * t);
+
+      step++;
+      if (step > steps) {
+        clearInterval(interval);
+
+        const distance = Math.abs(this.x - targetX);
+        const verticalOverlap = Math.abs(this.y - targetY);
+        if (!char.isDead() && distance < 60 && verticalOverlap < 80) {
+          char.energy = 0;
+          char.lastHit = new Date().getTime();
+          this.world.statusBar.setPrecentage(char.energy);
+          this.playAlertAnimation();
+        }
+
+        this.isAttacking = false;
+        this.fallToGround();
+      }
+    }, 40);
+  }
+
+  fallToGround() {
+    const groundY = 55; // Standardposition auf dem Boden
+    const fallInterval = setInterval(() => {
+      if (this.y < groundY) {
+        this.y += 5;
+      } else {
+        this.y = groundY;
+        clearInterval(fallInterval);
+      }
+    }, 40);
+  }
+
+  animateDeath(callback) {
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < this.IMAGES_DEAD.length) {
+        this.img = this.imageCache[this.IMAGES_DEAD[i]];
+        i++;
+      } else {
+        clearInterval(interval);
+        if (callback) callback();
+      }
+    }, 200);
+  }
+
+  fallDown() {
+    let fallInterval = setInterval(() => {
+      if (this.y < 400) {
+        this.y += 5;
+      } else {
+        clearInterval(fallInterval);
+      }
+    }, 40);
+  }
+
+  playAlertAnimation() {
+    let i = 0;
+    clearInterval(this.alertInterval); // vorherige Schleife beenden
+    this.alertInterval = setInterval(() => {
+      this.img = this.imageCache[this.IMAGES_ALERT[i]];
+      i = (i + 1) % this.IMAGES_ALERT.length; // Loop zurück zum ersten Bild
+    }, 120);
+  }
+
   animate() {
     setInterval(() => {
-      this.playAnimation(this.IMAGES_WALKING);
+      if (this.isDead) return;
 
-      if (!this.directionLeft) {
-        this.x += 3;
-        this.otherDirection = true;
-        if (this.x >= 2700) this.directionLeft = true;
-      } else {
-        this.x -= 3;
-        this.otherDirection = false;
-        if (this.x <= 2200) this.directionLeft = false;
+      const distance = Math.abs(this.x - this.world.character.x);
+
+      if (distance < 150 && !this.isAttacking) {
+        this.playAttackAnimation();
+      } else if (!this.isAttacking) {
+        this.playAnimation(this.IMAGES_WALKING);
+
+        if (!this.directionLeft) {
+          this.x += this.speedBoost ? 6 : 3;
+          this.otherDirection = true;
+          if (this.x >= 2700) this.directionLeft = true;
+        } else {
+          this.x -= this.speedBoost ? 6 : 3;
+          this.otherDirection = false;
+          if (this.x <= 2200) this.directionLeft = false;
+        }
       }
     }, 150);
   }

@@ -35,8 +35,6 @@ class Chicken extends MovableObject {
     if (this.isDead) return;
     this.isDead = true;
 
-    console.log("Chicken wurde getroffen!", this);
-
     this.loadImage(this.IMAGES_DEAD[0]); // Setze Todesbild sofort
     this.speed = 0;
     this.y += 10;

@@ -13,7 +13,7 @@ for (let i = 0; i < 7; i++) {
   enemies.push(new ChickenSmall());
 }
 
-enemies.push(new Endboss());
+// enemies.push(new Endboss());
 
 const level1 = new Level(
   enemies,
