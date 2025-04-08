@@ -50,3 +50,7 @@ window.addEventListener("keyup", (e) => {
     keyboard.D = false;
   }
 });
+
+function restartGame() {
+  location.reload(); // Spiel neu starten
+}

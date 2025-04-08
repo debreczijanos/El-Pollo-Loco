@@ -27,7 +27,11 @@ class World {
   }
 
   run() {
-    setInterval(() => {
+    this.gameInterval = setInterval(() => {
+      if (this.character.isDead()) {
+        this.showGameOverScreen();
+        return;
+      }
       this.checkCollisions();
       this.checkThrowableObjects();
       // Nur ausführen, wenn es noch Münzen gibt
@@ -80,6 +84,12 @@ class World {
     }
   }
 
+  showGameOverScreen() {
+    clearInterval(this.gameInterval); // stoppe das Spiel
+    cancelAnimationFrame(this.animationFrame); // stoppe das Zeichnen
+    document.getElementById("game-over-screen").style.display = "flex";
+  }
+
   draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -106,7 +116,7 @@ class World {
     this.checkCollisions();
 
     let self = this;
-    requestAnimationFrame(function () {
+    this.animationFrame = requestAnimationFrame(function () {
       self.draw();
     });
   }
