@@ -64,22 +64,42 @@ class Endboss extends MovableObject {
   }
 
   hit() {
+    this.reduceEnergy();
+    this.handleHurtState();
+    this.checkDeathState();
+  }
+
+  reduceEnergy() {
     this.energy -= 20;
+    if (this.energy < 0) this.energy = 0;
+  }
+
+  handleHurtState() {
     if (!this.isDead) {
       this.playHurtAnimation();
     }
-    if (this.energy < 0) this.energy = 0;
+  }
+
+  checkDeathState() {
     if (this.energy === 0 && !this.isDead) {
-      this.isDead = true;
-      this.playAnimation(this.IMAGES_DEAD);
-      this.animateDeath(() => {
-        this.fallDown();
-        setTimeout(() => {
-          this.height = 0;
-          this.width = 0;
-        }, 3000);
-      });
+      this.die();
     }
+  }
+
+  die() {
+    this.isDead = true;
+    this.playAnimation(this.IMAGES_DEAD);
+    this.animateDeath(() => {
+      this.fallDown();
+      this.shrinkAfterDeath();
+    });
+  }
+
+  shrinkAfterDeath() {
+    setTimeout(() => {
+      this.height = 0;
+      this.width = 0;
+    }, 3000);
   }
 
   playHurtAnimation() {
@@ -95,18 +115,29 @@ class Endboss extends MovableObject {
   }
 
   playAttackAnimation() {
-    if (this.isAttacking || this.world.character.isDead()) return;
+    if (this.canStartAttack()) {
+      this.startAttack();
+    }
+  }
+
+  canStartAttack() {
+    return (
+      !this.isAttacking &&
+      !this.world.character.isDead() &&
+      !this.otherDirection
+    );
+  }
+
+  startAttack() {
     this.isAttacking = true;
+    this.playAttackFrames();
+  }
+
+  playAttackFrames() {
     let i = 0;
     const interval = setInterval(() => {
-      if (this.world.character.isDead()) {
-        clearInterval(interval);
-        this.isAttacking = false;
-        this.playAlertAnimation(() => {
-          this.isAttacking = false;
-        });
-        return;
-      }
+      if (this.shouldStopAttack(interval)) return;
+
       if (i < this.IMAGES_ATTACK.length) {
         this.img = this.imageCache[this.IMAGES_ATTACK[i]];
         i++;
@@ -117,55 +148,88 @@ class Endboss extends MovableObject {
     }, 100);
   }
 
+  shouldStopAttack(interval) {
+    if (this.world.character.isDead()) {
+      clearInterval(interval);
+      this.isAttacking = false;
+      this.playAlertAnimation(() => {
+        this.isAttacking = false;
+      });
+      return true;
+    }
+    return false;
+  }
+
   jumpTowardsCharacter() {
     const char = this.world.character;
+    if (this.shouldCancelJump(char)) return;
+
+    const jumpParams = this.calculateJumpParameters(char);
+    this.executeJump(jumpParams);
+  }
+
+  shouldCancelJump(char) {
     if (char.isDead()) {
       this.isAttacking = false;
       this.playAlertAnimation(() => {
         this.isAttacking = false;
       });
-      return;
+      return true;
     }
+    return false;
+  }
 
-    const startX = this.x;
-    const startY = this.y;
-    const targetX = char.x + char.width / 2 - this.width / 2;
-    const targetY = char.y + char.height - this.height;
+  calculateJumpParameters(char) {
+    return {
+      startX: this.x,
+      startY: this.y,
+      targetX: char.x + char.width / 2 - this.width / 2,
+      targetY: char.y + char.height - this.height,
+      steps: 20,
+    };
+  }
 
-    const steps = 20;
+  executeJump(params) {
     let step = 0;
-
     const interval = setInterval(() => {
-      if (!char || char.isDead()) {
+      if (this.shouldCancelJump(this.world.character)) {
         clearInterval(interval);
-        this.isAttacking = false;
-        this.playAlertAnimation(() => {
-          this.isAttacking = false;
-        });
         return;
       }
 
-      const t = step / steps;
-      this.x = startX + (targetX - startX) * t;
-      this.y = startY + (targetY - startY) * t - 120 * Math.sin(Math.PI * t);
+      this.updateJumpPosition(params, step);
 
       step++;
-      if (step > steps) {
-        clearInterval(interval);
-
-        const distance = Math.abs(this.x - targetX);
-        const verticalOverlap = Math.abs(this.y - targetY);
-        if (!char.isDead() && distance < 60 && verticalOverlap < 80) {
-          char.energy = 0;
-          char.lastHit = new Date().getTime();
-          this.world.statusBar.setPrecentage(char.energy);
-          this.playAlertAnimation();
-        }
-
-        this.isAttacking = false;
-        this.fallToGround();
+      if (step > params.steps) {
+        this.finishJump(interval);
       }
     }, 40);
+  }
+
+  updateJumpPosition(params, step) {
+    const t = step / params.steps;
+    this.x = params.startX + (params.targetX - params.startX) * t;
+    this.y =
+      params.startY +
+      (params.targetY - params.startY) * t -
+      120 * Math.sin(Math.PI * t);
+  }
+
+  finishJump(interval) {
+    clearInterval(interval);
+    this.handleCharacterCollision();
+    this.isAttacking = false;
+    this.fallToGround();
+  }
+
+  handleCharacterCollision() {
+    const char = this.world.character;
+    if (!char.isDead() && this.isColliding(char)) {
+      char.energy = 0;
+      char.lastHit = new Date().getTime();
+      this.world.statusBar.setPrecentage(char.energy);
+      this.playAlertAnimation();
+    }
   }
 
   fallToGround() {
@@ -215,24 +279,60 @@ class Endboss extends MovableObject {
   animate() {
     setInterval(() => {
       if (this.isDead) return;
-
-      const distance = Math.abs(this.x - this.world.character.x);
-
-      if (distance < 150 && !this.isAttacking) {
-        this.playAttackAnimation();
-      } else if (!this.isAttacking) {
-        this.playAnimation(this.IMAGES_WALKING);
-
-        if (!this.directionLeft) {
-          this.x += this.speedBoost ? 6 : 3;
-          this.otherDirection = true;
-          if (this.x >= 2700) this.directionLeft = true;
-        } else {
-          this.x -= this.speedBoost ? 6 : 3;
-          this.otherDirection = false;
-          if (this.x <= 2200) this.directionLeft = false;
-        }
-      }
+      this.updateBehavior();
     }, 150);
+  }
+
+  updateBehavior() {
+    const distance = Math.abs(this.x - this.world.character.x);
+    const char = this.world.character;
+
+    if (this.shouldAttack(char)) {
+      this.prepareAttack();
+    } else if (this.shouldMove()) {
+      this.move();
+    }
+  }
+
+  shouldAttack(char) {
+    return (
+      (this.isColliding(char) && !this.isAttacking) ||
+      (Math.abs(this.x - char.x) < 150 && !this.isAttacking)
+    );
+  }
+
+  prepareAttack() {
+    this.otherDirection = false;
+    this.directionLeft = true;
+    this.playAttackAnimation();
+  }
+
+  shouldMove() {
+    return !this.isAttacking;
+  }
+
+  move() {
+    this.playAnimation(this.IMAGES_WALKING);
+    this.updatePosition();
+  }
+
+  updatePosition() {
+    if (!this.directionLeft) {
+      this.moveRight();
+    } else {
+      this.moveLeft();
+    }
+  }
+
+  moveRight() {
+    this.x += this.speedBoost ? 6 : 3;
+    this.otherDirection = true;
+    if (this.x >= 2700) this.directionLeft = true;
+  }
+
+  moveLeft() {
+    this.x -= this.speedBoost ? 6 : 3;
+    this.otherDirection = false;
+    if (this.x <= 2200) this.directionLeft = false;
   }
 }

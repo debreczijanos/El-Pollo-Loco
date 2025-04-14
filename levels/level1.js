@@ -1,22 +1,24 @@
+function createEnemies() {
+  let enemies = [];
+
+  for (let i = 0; i < 8; i++) {
+    enemies.push(new Chicken());
+  }
+
+  for (let i = 0; i < 7; i++) {
+    enemies.push(new ChickenSmall());
+  }
+
+  return enemies;
+}
+
 let bottles = [];
 for (let i = 0; i < 20; i++) {
   bottles.push(new Bottle());
 }
 
-let enemies = [];
-
-for (let i = 0; i < 8; i++) {
-  enemies.push(new Chicken());
-}
-
-for (let i = 0; i < 7; i++) {
-  enemies.push(new ChickenSmall());
-}
-
-// enemies.push(new Endboss());
-
 const level1 = new Level(
-  enemies,
+  createEnemies(),
 
   [new Cloud()],
 

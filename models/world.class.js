@@ -1,20 +1,40 @@
 class World {
-  character = new Character();
-  level = level1;
+  character;
+  level;
   canvas;
   ctx;
   keyboard;
   camera_x = 0;
-  statusBar = new StatusBar();
-  statusBarCoins = new StatusBarCoins();
-  statusBarBottle = new StatusBarBottle();
-  statusBarEndboss = new StatusBarEndboss();
+  statusBar;
+  statusBarCoins;
+  statusBarBottle;
+  statusBarEndboss;
   throwableObjects = [];
+  game; // Referenz auf die Game-Klasse
 
-  constructor(canvas, keyboard) {
+  constructor(canvas, keyboard, game) {
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
     this.keyboard = keyboard;
+    this.game = game; // Speichere die Referenz auf die Game-Klasse
+
+    // Initialisiere alle Objekte neu
+    this.character = new Character();
+
+    // Erstelle neue Hühner und andere Level-Objekte
+    this.level = new Level(
+      createEnemies(), // Neue Hühner erstellen
+      [new Cloud()],
+      [...level1.backgroundObjects],
+      [...level1.coins],
+      [...level1.bottles]
+    );
+
+    this.statusBar = new StatusBar();
+    this.statusBarCoins = new StatusBarCoins();
+    this.statusBarBottle = new StatusBarBottle();
+    this.statusBarEndboss = new StatusBarEndboss();
+
     this.draw();
     this.setWorld();
     this.run();
@@ -29,7 +49,7 @@ class World {
   run() {
     this.gameInterval = setInterval(() => {
       if (this.character.isDead()) {
-        this.showGameOverScreen();
+        this.game.gameOver = true;
         return;
       }
       this.checkCollisions();
@@ -43,26 +63,107 @@ class World {
   }
 
   checkCollisions() {
+    this.checkStompCollisions();
+    this.checkSideCollisions();
+  }
+
+  checkStompCollisions() {
     const charBottom = this.character.y + this.character.height;
+    const charTop = this.character.y;
+    const charLeft = this.character.x;
+    const charRight = this.character.x + this.character.width;
+
     this.level.enemies.forEach((enemy) => {
       if (enemy.isDead || !(enemy instanceof Chicken)) return;
 
-      const enemyTop = enemy.y;
-      const stompFromAbove =
-        this.character.isColliding(enemy) &&
-        this.character.speedY >= 0 &&
-        charBottom <= enemyTop + enemy.height * 0.6;
-
-      if (stompFromAbove) {
-        enemy.hit();
-        this.character.speedY = -15;
-      } else if (this.character.isColliding(enemy)) {
-        if (!this.character.isHurt()) {
-          this.character.hit();
-          this.statusBar.setPrecentage(this.character.energy);
-        }
+      if (
+        this.isStompingOnEnemy(enemy, charTop, charBottom, charLeft, charRight)
+      ) {
+        this.handleStompCollision(enemy);
       }
     });
+  }
+
+  isStompingOnEnemy(enemy, charTop, charBottom, charLeft, charRight) {
+    const enemyTop = enemy.y;
+    const enemyLeft = enemy.x;
+    const enemyRight = enemy.x + enemy.width;
+
+    const isSmallChicken = enemy instanceof ChickenSmall;
+    const heightFactor = isSmallChicken ? 0.7 : 0.6;
+
+    return (
+      this.character.isColliding(enemy) &&
+      this.character.speedY >= 0 &&
+      charBottom <= enemyTop + enemy.height * heightFactor &&
+      charTop < enemyTop + enemy.height * heightFactor &&
+      (!isSmallChicken ||
+        (charRight > enemyLeft + enemy.width * 0.2 &&
+          charLeft < enemyRight - enemy.width * 0.2))
+    );
+  }
+
+  handleStompCollision(enemy) {
+    enemy.hit();
+    this.character.speedY = -15;
+
+    enemy.isDead = true;
+    enemy.ignoreCollisions = true;
+
+    this.character.justStomped = true;
+
+    setTimeout(() => {
+      this.character.justStomped = false;
+    }, 500);
+  }
+
+  checkSideCollisions() {
+    const charBottom = this.character.y + this.character.height;
+    const charTop = this.character.y;
+    const charLeft = this.character.x;
+    const charRight = this.character.x + this.character.width;
+
+    this.level.enemies.forEach((enemy) => {
+      if (enemy.isDead || !(enemy instanceof Chicken) || enemy.ignoreCollisions)
+        return;
+
+      if (
+        this.isSideCollidingWithEnemy(
+          enemy,
+          charTop,
+          charBottom,
+          charLeft,
+          charRight
+        )
+      ) {
+        this.handleSideCollision();
+      }
+    });
+  }
+
+  isSideCollidingWithEnemy(enemy, charTop, charBottom, charLeft, charRight) {
+    const enemyTop = enemy.y;
+    const enemyBottom = enemy.y + enemy.height;
+    const enemyLeft = enemy.x;
+    const enemyRight = enemy.x + enemy.width;
+
+    const isSmallChicken = enemy instanceof ChickenSmall;
+    const widthFactor = isSmallChicken ? 0.4 : 0.2;
+
+    return (
+      this.character.isColliding(enemy) &&
+      charRight > enemyLeft + enemy.width * widthFactor &&
+      charLeft < enemyRight - enemy.width * widthFactor &&
+      charBottom > enemyTop + enemy.height * 0.3 &&
+      charTop < enemyBottom - enemy.height * 0.3
+    );
+  }
+
+  handleSideCollision() {
+    if (!this.character.isHurt()) {
+      this.character.hit();
+      this.statusBar.setPrecentage(this.character.energy);
+    }
   }
 
   checkThrowableObjects() {
@@ -84,17 +185,12 @@ class World {
     }
   }
 
-  showGameOverScreen() {
-    clearInterval(this.gameInterval); // stoppe das Spiel
-    cancelAnimationFrame(this.animationFrame); // stoppe das Zeichnen
-    document.getElementById("game-over-screen").style.display = "flex";
-  }
-
   draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.ctx.translate(this.camera_x, 0);
     this.addObjectsToMap(this.level.backgroundObjects);
+    this.addObjectsToMap(this.level.clouds);
 
     this.ctx.translate(-this.camera_x, 0);
     this.addToMap(this.statusBar);
@@ -104,7 +200,6 @@ class World {
     this.ctx.translate(this.camera_x, 0);
 
     this.addToMap(this.character);
-    this.addObjectsToMap(this.level.clouds);
     this.addObjectsToMap(this.level.coins);
     this.addObjectsToMap(this.level.bottles);
 

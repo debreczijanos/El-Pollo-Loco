@@ -28,96 +28,135 @@ class ThrowableObject extends MovableObject {
   }
 
   trow() {
-    this.speedY = 30;
-    this.applyGravity();
-
-    let moveInterval = setInterval(() => {
-      if (this.checkCollisionWithEnemies()) {
-        clearInterval(moveInterval); // Stoppe Bewegung nach einem Treffer
-      } else if (this.y < 360) {
-        this.x += 13 * this.direction; // Bewege die Flasche weiter
-      } else {
-        clearInterval(moveInterval); // Stoppe die Bewegung am Boden
-        this.showSplash(this.x, this.y);
-      }
-    }, 25);
-
+    this.initializeThrow();
+    this.setupMovementInterval();
     this.animate();
   }
 
-  stopGravity() {
-    this.speedY = 0;
-    this.acceleration = 0;
+  initializeThrow() {
+    this.speedY = 30;
+    this.applyGravity();
+  }
+
+  setupMovementInterval() {
+    this.moveInterval = setInterval(() => {
+      if (this.shouldStopMovement()) {
+        this.handleMovementStop();
+      } else {
+        this.moveBottle();
+      }
+    }, 25);
+  }
+
+  shouldStopMovement() {
+    return this.checkCollisionWithEnemies() || this.y >= 360;
+  }
+
+  handleMovementStop() {
+    clearInterval(this.moveInterval);
+    if (this.y >= 360) {
+      this.showSplash(this.x, this.y);
+    }
+  }
+
+  moveBottle() {
+    this.x += 13 * this.direction;
   }
 
   animate() {
-    let animationInterval = setInterval(() => {
+    this.animationInterval = setInterval(() => {
       if (this.hasSplashed) {
-        // Wenn bereits Splash ausgelöst wurde, stoppe Animation
-        clearInterval(animationInterval);
+        this.stopAnimation();
         return;
       }
-
-      if (this.y < 360) {
-        this.playAnimation(this.IMAGES_BOTTLE_ROTATION);
-      } else {
-        this.playAnimation(this.IMAGES_BOTTLE_SPLASH);
-        this.hasSplashed = true; // Markiere, dass die Flasche gesplasht ist
-
-        setTimeout(() => {
-          clearInterval(animationInterval);
-          let index = world.throwableObjects.indexOf(this);
-          if (index > -1) {
-            world.throwableObjects.splice(index, 1); // Entferne die Flasche nach Splash
-          }
-        }, 500);
-      }
+      this.updateAnimation();
     }, 50);
   }
 
+  stopAnimation() {
+    clearInterval(this.animationInterval);
+  }
+
+  updateAnimation() {
+    if (this.y < 360) {
+      this.playAnimation(this.IMAGES_BOTTLE_ROTATION);
+    } else {
+      this.handleSplashAnimation();
+    }
+  }
+
+  handleSplashAnimation() {
+    this.playAnimation(this.IMAGES_BOTTLE_SPLASH);
+    this.hasSplashed = true;
+    this.removeBottleAfterDelay();
+  }
+
+  removeBottleAfterDelay() {
+    setTimeout(() => {
+      this.removeBottle();
+    }, 500);
+  }
+
+  removeBottle() {
+    let index = world.throwableObjects.indexOf(this);
+    if (index > -1) {
+      world.throwableObjects.splice(index, 1);
+    }
+  }
+
   checkCollisionWithEnemies() {
-    if (this.hasSplashed) return false; // Verhindert mehrfaches Treffen
+    if (this.hasSplashed) return false;
 
     for (let enemy of world.level.enemies) {
       if (this.isColliding(enemy)) {
-        clearInterval(this.moveInterval); // Stoppe die Bewegung sofort
-        this.stopGravity(); // Deaktiviere die Gravitation
-        this.y = enemy.y + enemy.height / 2 - this.height / 2; // Setze die Flasche auf den Gegner
-        this.x = enemy.x + enemy.width / 2 - this.width / 2;
-
-        this.hasSplashed = true; // Markiere, dass die Flasche gesplasht ist
-        this.loadImage(this.IMAGES_BOTTLE_SPLASH[0]); // Sofort Splash-Animation anzeigen
-        this.playAnimation(this.IMAGES_BOTTLE_SPLASH);
-
-        if (enemy instanceof Endboss) {
-          enemy.takeHitFromBottle();
-        } else {
-          enemy.hit();
-        }
-
-        setTimeout(() => {
-          let index = world.throwableObjects.indexOf(this);
-          if (index > -1) {
-            world.throwableObjects.splice(index, 1); // Entferne die Flasche nach Splash
-          }
-        }, 500);
-
+        this.handleEnemyCollision(enemy);
         return true;
       }
     }
     return false;
   }
 
+  handleEnemyCollision(enemy) {
+    this.stopMovement();
+    this.positionBottleOnEnemy(enemy);
+    this.initiateSplash();
+    this.damageEnemy(enemy);
+    this.removeBottleAfterDelay();
+  }
+
+  stopMovement() {
+    clearInterval(this.moveInterval);
+    this.stopGravity();
+  }
+
+  positionBottleOnEnemy(enemy) {
+    this.y = enemy.y + enemy.height / 2 - this.height / 2;
+    this.x = enemy.x + enemy.width / 2 - this.width / 2;
+  }
+
+  initiateSplash() {
+    this.hasSplashed = true;
+    this.loadImage(this.IMAGES_BOTTLE_SPLASH[0]);
+    this.playAnimation(this.IMAGES_BOTTLE_SPLASH);
+  }
+
+  damageEnemy(enemy) {
+    if (enemy instanceof Endboss) {
+      enemy.takeHitFromBottle();
+    } else {
+      enemy.hit();
+    }
+  }
+
   showSplash(x, y) {
     this.x = x;
     this.y = y;
     this.playAnimation(this.IMAGES_BOTTLE_SPLASH);
+    this.removeBottleAfterDelay();
+  }
 
-    setTimeout(() => {
-      let index = world.throwableObjects.indexOf(this);
-      if (index > -1) {
-        world.throwableObjects.splice(index, 1); // Entfernt die Flasche nach Splash
-      }
-    }, 500); // Splash-Animation für 0,5 Sekunden abspielen
+  stopGravity() {
+    this.speedY = 0;
+    this.acceleration = 0;
   }
 }

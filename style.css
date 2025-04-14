@@ -47,7 +47,15 @@ canvas {
   }
 }
 
-.game_over_background {
+#start-screen {
+  width: 720px;
+  height: 480px;
+  position: absolute;
+  z-index: 10;
+}
+
+.game_over_background,
+.start-background {
   position: absolute;
   width: 720px;
   height: 480px;

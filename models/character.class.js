@@ -3,6 +3,7 @@ class Character extends MovableObject {
   y = 80;
   speed = 10;
   collectedBottles = 0;
+  justStomped = false;
   IMAGES_WALKING = [
     "img/2_character_pepe/2_walk/W-21.png",
     "img/2_character_pepe/2_walk/W-22.png",
@@ -78,59 +79,111 @@ class Character extends MovableObject {
   }
 
   animate() {
+    this.setupMovementInterval();
+    this.setupAnimationInterval();
+  }
+
+  setupMovementInterval() {
     setInterval(() => {
-      if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
-        this.moveRight();
-        this.otherDirection = false;
-      }
-      if (this.world.keyboard.LEFT && this.x > 0) {
-        this.moveLeft();
-        this.otherDirection = true;
-      }
-      if (this.world.keyboard.SPACE && !this.isAboveGround()) {
-        this.jump();
-      }
-      this.world.camera_x = -this.x + 100;
+      if (this.isDead()) return;
+      this.handleMovement();
     }, 1000 / 60);
+  }
 
+  handleMovement() {
+    if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
+      this.moveRight();
+      this.otherDirection = false;
+    }
+    if (this.world.keyboard.LEFT && this.x > 0) {
+      this.moveLeft();
+      this.otherDirection = true;
+    }
+    if (this.world.keyboard.SPACE && !this.isAboveGround()) {
+      this.jump();
+    }
+    this.world.camera_x = -this.x + 100;
+  }
+
+  setupAnimationInterval() {
     let idleTime = 0;
-
     setInterval(() => {
       if (this.isDead()) {
-        if (!this.hasPlayedDeathAnimation) {
-          this.hasPlayedDeathAnimation = true;
-          this.deathAnimationInterval = setInterval(() => {
-            if (this.deathAnimationFrame < this.IMAGES_DEAD.length) {
-              const path = this.IMAGES_DEAD[this.deathAnimationFrame];
-              this.img = this.imageCache[path];
-              this.deathAnimationFrame++;
-            } else {
-              clearInterval(this.deathAnimationInterval);
-            }
-          }, 100); // etwas langsamer abspielen
-        }
+        this.handleDeathAnimation();
         return;
-      } else if (this.isHurt()) {
-        this.playAnimation(this.IMAGES_HURT);
-        idleTime = 0;
-      } else if (this.isAboveGround()) {
-        this.playAnimation(this.IMAGES_JUMPING);
-        idleTime = 0;
-      } else if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-        this.playAnimation(this.IMAGES_WALKING);
-        idleTime = 0;
-      } else {
-        idleTime += 50;
-        if (idleTime > 4000) {
-          this.playAnimation(this.IMAGES_LONG_IDLE);
-        } else {
-          this.playAnimation(this.IMAGES_IDLE);
-        }
       }
+      idleTime = this.updateAnimationState(idleTime);
     }, 50);
+  }
+
+  handleDeathAnimation() {
+    if (!this.hasPlayedDeathAnimation) {
+      this.hasPlayedDeathAnimation = true;
+      this.playDeathAnimation();
+    }
+  }
+
+  playDeathAnimation() {
+    this.deathAnimationInterval = setInterval(() => {
+      if (this.deathAnimationFrame < this.IMAGES_DEAD.length) {
+        const path = this.IMAGES_DEAD[this.deathAnimationFrame];
+        this.img = this.imageCache[path];
+        this.deathAnimationFrame++;
+      } else {
+        clearInterval(this.deathAnimationInterval);
+      }
+    }, 100);
+  }
+
+  updateAnimationState(idleTime) {
+    if (this.isHurt()) {
+      this.playAnimation(this.IMAGES_HURT);
+      return 0;
+    } else if (this.isAboveGround()) {
+      this.playAnimation(this.IMAGES_JUMPING);
+      return 0;
+    } else if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
+      this.playAnimation(this.IMAGES_WALKING);
+      return 0;
+    } else {
+      idleTime += 50;
+      this.updateIdleAnimation(idleTime);
+      return idleTime;
+    }
+  }
+
+  updateIdleAnimation(idleTime) {
+    if (idleTime > 4000) {
+      this.playAnimation(this.IMAGES_LONG_IDLE);
+    } else {
+      this.playAnimation(this.IMAGES_IDLE);
+    }
   }
 
   jump() {
     this.speedY = 30;
   }
+
+  stopAnimation() {
+    if (this.deathAnimationInterval) {
+      clearInterval(this.deathAnimationInterval);
+    }
+    // Stoppe alle anderen Animationen
+    let highestIntervalId = setInterval(() => {}, 0);
+    for (let i = 0; i < highestIntervalId; i++) {
+      clearInterval(i);
+    }
+  }
 }
+
+let collisionInterval = setInterval(() => {
+  console.log({
+    characterEnergy: world.character.energy,
+    isHurt: world.character.isHurt(),
+    justStomped: world.character.justStomped,
+    statusBarPercentage: world.statusBar.percentage,
+    chickens: world.level.enemies
+      .filter((e) => e instanceof Chicken)
+      .map((c) => ({ isDead: c.isDead, ignoreCollisions: c.ignoreCollisions })),
+  });
+}, 500);

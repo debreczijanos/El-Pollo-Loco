@@ -40,16 +40,6 @@ class MovableObject extends DrawableObject {
     return collides;
   }
 
-  // Bessere Formel zur Kollisionsberechnung (Genauer)
-  // isColliding(mo) {
-  //   return (
-  //     this.x + this.width * 0.8 > mo.x + mo.width * 0.2 && // Verkleinert die linke Kollisionsfläche
-  //     this.x + this.width * 0.2 < mo.x + mo.width * 0.8 && // Verkleinert die rechte Kollisionsfläche
-  //     this.y + this.height * 0.8 > mo.y + mo.height * 0.2 && // Verkleinert die obere Kollisionsfläche
-  //     this.y + this.height * 0.2 < mo.y + mo.height * 0.8 // Verkleinert die untere Kollisionsfläche
-  //   );
-  // }
-
   hit() {
     this.energy -= 5;
     if (this.energy < 0) {

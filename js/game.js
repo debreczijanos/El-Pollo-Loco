@@ -1,12 +1,14 @@
 let canvas;
 let world;
 let keyboard = new Keyboard();
+let game;
 
 function init() {
   canvas = document.getElementById("canvas");
-  world = new World(canvas, keyboard);
-
-  console.log("My Character is", world.character);
+  game = new Game();
+  world = new World(canvas, keyboard, game);
+  game.setWorld(world);
+  game.gameLoop();
 }
 
 window.addEventListener("keydown", (e) => {
@@ -52,5 +54,69 @@ window.addEventListener("keyup", (e) => {
 });
 
 function restartGame() {
-  location.reload(); // Spiel neu starten
+  // Alle Intervalle und Animationen stoppen
+  if (world) {
+    if (world.gameInterval) {
+      clearInterval(world.gameInterval);
+    }
+    if (world.animationFrame) {
+      cancelAnimationFrame(world.animationFrame);
+    }
+  }
+
+  // Game Over Screen ausblenden
+  document.getElementById("game-over-screen").style.display = "none";
+
+  // Level zurücksetzen
+  world = null;
+  canvas = null;
+
+  // Neues Level initialisieren
+  init();
+}
+
+function startGame() {
+  if (window.gameStarted) return;
+  window.gameStarted = true;
+
+  document.getElementById("start-screen").style.display = "none";
+  init(); // Spiel starten
+}
+
+class Game {
+  constructor() {
+    this.world = null;
+    this.gameOver = false;
+  }
+
+  setWorld(world) {
+    this.world = world;
+  }
+
+  gameLoop() {
+    // Prüfe, ob das Spiel vorbei ist
+    if (this.gameOver) {
+      this.showGameOverScreen();
+      return;
+    }
+
+    // Führe die Spielschleife aus
+    requestAnimationFrame(() => this.gameLoop());
+  }
+
+  showGameOverScreen() {
+    // Stoppe alle Spiel-Intervalle
+    clearInterval(this.world.gameInterval);
+    cancelAnimationFrame(this.world.animationFrame);
+
+    // Stoppe alle Bewegungen und Animationen
+    this.world.character.stopAnimation();
+    this.world.level.enemies.forEach((enemy) => {
+      if (enemy.stopAnimation) enemy.stopAnimation();
+      if (enemy.stopMovement) enemy.stopMovement();
+    });
+
+    // Zeige Game Over Screen
+    document.getElementById("game-over-screen").style.display = "flex";
+  }
 }
