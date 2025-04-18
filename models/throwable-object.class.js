@@ -88,6 +88,12 @@ class ThrowableObject extends MovableObject {
   handleSplashAnimation() {
     this.playAnimation(this.IMAGES_BOTTLE_SPLASH);
     this.hasSplashed = true;
+
+    // Spiele Splash-Sound ab
+    if (world && world.soundManager) {
+      world.soundManager.playSound("splash");
+    }
+
     this.removeBottleAfterDelay();
   }
 
@@ -145,6 +151,11 @@ class ThrowableObject extends MovableObject {
       enemy.takeHitFromBottle();
     } else {
       enemy.hit();
+    }
+
+    // Spiele Hit-Sound ab
+    if (world && world.soundManager) {
+      world.soundManager.playSound("hit");
     }
   }
 

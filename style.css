@@ -3,7 +3,8 @@
   src: url(./fonts/zabars.ttf);
 }
 
-body {
+body,
+#gameScreen {
   margin: 0;
   padding: 0;
   display: flex;
@@ -47,7 +48,8 @@ canvas {
   }
 }
 
-#start-screen {
+#start-screen,
+#victory-screen {
   width: 720px;
   height: 480px;
   position: absolute;
@@ -55,10 +57,27 @@ canvas {
 }
 
 .game_over_background,
-.start-background {
+.start-background,
+.victory-background {
   position: absolute;
   width: 720px;
   height: 480px;
+  object-fit: cover;
+}
+
+.victory-background {
+  z-index: -1;
+  justify-content: center;
+  align-items: center;
+}
+
+.victory-write {
+  width: 100%;
+  max-width: 400px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .restart-btn {
@@ -77,6 +96,14 @@ canvas {
   border: solid transparent;
   border-radius: 10px;
   padding: 6px;
+}
+
+.restart-btn:hover {
+  background-color: #ffd740;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 
 .description {
@@ -98,7 +125,11 @@ canvas {
 }
 
 @media only screen and (max-width: 720px) {
-  canvas {
+  canvas,
+  #gameScreen,
+  #start-screen,
+  #victory-screen,
+  #game-over-screen {
     width: 100%;
   }
 
@@ -108,7 +139,20 @@ canvas {
 }
 
 @media only screen and (max-height: 480px) {
-  canvas {
+  canvas,
+  #gameScreen,
+  #start-screen,
+  #victory-screen,
+  #game-over-screen {
+    /* height: 100vh; */
+    height: 100%;
+    width: 100vw;
+  }
+
+  .game_over_background,
+  .start-background,
+  .victory-background {
+    width: 100vw;
     height: 100vh;
   }
 

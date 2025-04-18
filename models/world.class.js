@@ -210,6 +210,11 @@ class World {
 
     this.checkCollisions();
 
+    // Prüfe, ob der Spieler gewonnen hat
+    if (this.game && this.game.checkVictory) {
+      this.game.checkVictory();
+    }
+
     let self = this;
     this.animationFrame = requestAnimationFrame(function () {
       self.draw();

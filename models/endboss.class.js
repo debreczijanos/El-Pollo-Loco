@@ -59,8 +59,35 @@ class Endboss extends MovableObject {
   }
 
   takeHitFromBottle() {
-    this.hit();
-    this.statusBar.setPrecentage(this.energy);
+    if (this.isDead) return;
+
+    this.energy -= 20;
+    this.lastHit = new Date().getTime();
+
+    if (this.energy <= 0) {
+      this.energy = 0;
+      this.isDead = true;
+
+      // Spiele Victory-Sound ab
+      if (this.world && this.world.soundManager) {
+        this.world.soundManager.playSound("victory");
+        this.world.soundManager.stopBackgroundMusic();
+      }
+
+      this.animateDeath(() => {
+        // Nach der Todesanimation
+        setTimeout(() => {
+          let index = this.world.level.enemies.indexOf(this);
+          if (index > -1) {
+            this.world.level.enemies.splice(index, 1);
+          }
+        }, 1000);
+      });
+    } else {
+      this.playHurtAnimation();
+    }
+
+    this.world.statusBarEndboss.setPrecentage(this.energy);
   }
 
   hit() {

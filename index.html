@@ -31,37 +31,55 @@
 
     <script src="./levels/level1.js"></script>
 
+    <script src="./js/sound-manager.js"></script>
     <script src="./js/game.js"></script>
-
+    <script src="./js/swap-iphone.js"></script>
 </head>
 
 <body>
 
-    <div id="start-screen">
-        <img class="start-background" src="img/9_intro_outro_screens/start/startscreen_1.png" alt="Start Screen" />
-        <button class="restart-btn" onclick="startGame()">Play</button>
-        <div class="description">
-            <p>Move Left: Arrow Left</p>
-            <p>Move Right: Arrow Right</p>
-            <p>Jump: SPACE</p>
-            <p>Throw: D </p>
-        </div>
+    <div id="swapYourPhone" class="swapYourPhone" style="display: none;">
+        <img src="img/11_icon/swapYourPhone.gif" alt="Bitte drehen" />
     </div>
 
-    <canvas id="canvas" width="720" height="480"></canvas>
+    <div id="gameScreen" style="display: none;">
+        <div id="start-screen">
+            <img class="start-background" src="img/9_intro_outro_screens/start/startscreen_1.png" alt="Start Screen" />
+            <button class="restart-btn" onclick="startGame()">Play</button>
+            <div class="description">
+                <p>Move Left: Arrow Left</p>
+                <p>Move Right: Arrow Right</p>
+                <p>Jump: SPACE</p>
+                <p>Throw: D </p>
+            </div>
+        </div>
 
-    <div id="game-over-screen" style="display: none;">
-        <img class="game-over-background" src="img/5_background/second_half_background.png" alt="background">
-        <img class="game-over-write" src="img/9_intro_outro_screens/game_over/game over!.png" alt="Game Over" />
-        <button class="restart-btn" onclick="restartGame()">Play Again</button>
-        <div class="description">
-            <p>Move Left: Arrow Left</p>
-            <p>Move Right: Arrow Right</p>
-            <p>Jump: SPACE</p>
-            <p>Throw: D </p>
+        <canvas id="canvas" width="720" height="480"></canvas>
+
+        <div id="game-over-screen" style="display: none;">
+            <img class="game-over-background" src="img/5_background/second_half_background.png" alt="background">
+            <img class="game-over-write" src="img/9_intro_outro_screens/game_over/game over!.png" alt="Game Over" />
+            <button class="restart-btn" onclick="restartGame()">Play Again</button>
+            <div class="description">
+                <p>Move Left: Arrow Left</p>
+                <p>Move Right: Arrow Right</p>
+                <p>Jump: SPACE</p>
+                <p>Throw: D </p>
+            </div>
+        </div>
+
+        <div id="victory-screen" style="display: none;">
+            <img class="victory-background" src="img/9_intro_outro_screens/victory/victory_1.png" alt="background">
+            <img class="victory-write" src="img/9_intro_outro_screens/victory/victory_2.png" alt="Victory" />
+            <button class="restart-btn" onclick="restartGame()">Play Again</button>
+            <div class="description">
+                <p>Move Left: Arrow Left</p>
+                <p>Move Right: Arrow Right</p>
+                <p>Jump: SPACE</p>
+                <p>Throw: D </p>
+            </div>
         </div>
     </div>
-
 </body>
 
 </html>

@@ -65,6 +65,8 @@ class Character extends MovableObject {
   world;
   hasPlayedDeathAnimation = false;
   deathAnimationFrame = 0;
+  isWalkingSoundPlaying = false;
+  hasPlayedHurtSound = false;
 
   constructor() {
     super().loadImage("img/2_character_pepe/2_walk/W-21.png");
@@ -91,14 +93,25 @@ class Character extends MovableObject {
   }
 
   handleMovement() {
+    let isMoving = false;
+
     if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
       this.moveRight();
       this.otherDirection = false;
-    }
-    if (this.world.keyboard.LEFT && this.x > 0) {
+      isMoving = true;
+    } else if (this.world.keyboard.LEFT && this.x > 0) {
       this.moveLeft();
       this.otherDirection = true;
+      isMoving = true;
     }
+
+    // Sound-Steuerung basierend auf Bewegung
+    if (isMoving && !this.isWalkingSoundPlaying) {
+      this.playWalkingSound();
+    } else if (!isMoving && this.isWalkingSoundPlaying) {
+      this.stopWalkingSound();
+    }
+
     if (this.world.keyboard.SPACE && !this.isAboveGround()) {
       this.jump();
     }
@@ -138,6 +151,7 @@ class Character extends MovableObject {
   updateAnimationState(idleTime) {
     if (this.isHurt()) {
       this.playAnimation(this.IMAGES_HURT);
+      this.playHurtSound();
       return 0;
     } else if (this.isAboveGround()) {
       this.playAnimation(this.IMAGES_JUMPING);
@@ -162,6 +176,9 @@ class Character extends MovableObject {
 
   jump() {
     this.speedY = 30;
+    if (this.world && this.world.soundManager) {
+      this.world.soundManager.playSound("jump");
+    }
   }
 
   stopAnimation() {
@@ -172,6 +189,36 @@ class Character extends MovableObject {
     let highestIntervalId = setInterval(() => {}, 0);
     for (let i = 0; i < highestIntervalId; i++) {
       clearInterval(i);
+    }
+
+    // Stoppe den Walking-Sound
+    this.stopWalkingSound();
+  }
+
+  playWalkingSound() {
+    if (this.world && this.world.soundManager) {
+      this.world.soundManager.playSound("walking");
+      this.isWalkingSoundPlaying = true;
+    }
+  }
+
+  stopWalkingSound() {
+    if (this.world && this.world.soundManager && this.isWalkingSoundPlaying) {
+      this.world.soundManager.sounds.walking.pause();
+      this.world.soundManager.sounds.walking.currentTime = 0;
+      this.isWalkingSoundPlaying = false;
+    }
+  }
+
+  playHurtSound() {
+    if (this.world && this.world.soundManager && !this.hasPlayedHurtSound) {
+      this.world.soundManager.playSound("hurt");
+      this.hasPlayedHurtSound = true;
+
+      // Setze den Flag zurück, damit der Sound beim nächsten Verletztwerden wieder abgespielt wird
+      setTimeout(() => {
+        this.hasPlayedHurtSound = false;
+      }, 1000);
     }
   }
 }
