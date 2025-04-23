@@ -35,6 +35,10 @@ class Chicken extends MovableObject {
     if (this.isDead) return;
     this.isDead = true;
 
+    if (world && world.soundManager) {
+      world.soundManager.playSound("hit");
+    }
+
     this.loadImage(this.IMAGES_DEAD[0]); // Setze Todesbild sofort
     this.speed = 0;
     this.y += 10;

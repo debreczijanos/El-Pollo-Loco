@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="img/6_salsa_bottle/2_salsa_bottle_on_ground.png">
 
     <link rel="stylesheet" href="style.css">
 
@@ -43,6 +44,15 @@
     </div>
 
     <div id="gameScreen" style="display: none;">
+        <button id="soundToggleBtn" class="sound-btn">🔊</button>
+
+        <div class="description-mobile" style="display: none">
+            <button id="btn-left"><img src="img/11_icon/back.png" alt="links"></button>
+            <button id="btn-right"><img src="img/11_icon/next.png" alt="rechts"></button>
+            <button id="btn-throw"><img src="img/11_icon/curve-arrow.png" alt="throw"></button>
+            <button id="btn-jump"><img src="img/11_icon/up-arrow.png" alt="jump"></button>
+        </div>
+
         <div id="start-screen">
             <img class="start-background" src="img/9_intro_outro_screens/start/startscreen_1.png" alt="Start Screen" />
             <button class="restart-btn" onclick="startGame()">Play</button>
@@ -80,6 +90,20 @@
             </div>
         </div>
     </div>
+
+    <script>
+        let soundOn = true;
+
+        document.getElementById("soundToggleBtn").addEventListener("click", function () {
+            soundOn = !soundOn;
+            this.textContent = soundOn ? "🔊" : "🔇";
+
+            // Wenn du einen Sound-Manager hast, mute/unmute hier:
+            if (typeof soundManager !== "undefined") {
+                soundManager.toggleMute(soundOn); // Implementiere ggf. in sound-manager.js
+            }
+        });
+    </script>
 </body>
 
 </html>

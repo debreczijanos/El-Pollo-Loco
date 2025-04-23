@@ -23,7 +23,6 @@ class MovableObject extends DrawableObject {
 
   isAboveGround() {
     if (this instanceof ThrowableObject) {
-      // Korrektur: `ThrowableObject`
       return this.y < 360; // Jetzt stimmt der Boden für Flaschen
     } else {
       return this.y < 180;

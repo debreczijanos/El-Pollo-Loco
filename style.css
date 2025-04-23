@@ -19,6 +19,11 @@ body,
   background-size: auto;
 }
 
+#gameScreen {
+  position: relative;
+  max-height: 480px;
+}
+
 h1 {
   font-size: 64px;
   letter-spacing: 3px;
@@ -124,6 +129,27 @@ canvas {
   }
 }
 
+.description-mobile {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  font-size: 22px;
+  background-color: transparent;
+  z-index: 11;
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    border: none;
+  }
+}
+
 @media only screen and (max-width: 720px) {
   canvas,
   #gameScreen,
@@ -159,4 +185,21 @@ canvas {
   h1 {
     display: none;
   }
+}
+
+.sound-btn {
+  position: absolute;
+  top: 30px;
+  right: 10px;
+  z-index: 20;
+  font-size: 22px;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.sound-btn:hover {
+  background-color: #ffd740;
 }

@@ -168,3 +168,32 @@ class Game {
     }
   }
 }
+
+function setupMobileControls() {
+  const btnLeft = document.querySelector("#btn-left");
+  const btnRight = document.querySelector("#btn-right");
+  const btnJump = document.querySelector("#btn-jump");
+  const btnThrow = document.querySelector("#btn-throw");
+
+  if (btnLeft) {
+    btnLeft.addEventListener("touchstart", () => (keyboard.LEFT = true));
+    btnLeft.addEventListener("touchend", () => (keyboard.LEFT = false));
+  }
+
+  if (btnRight) {
+    btnRight.addEventListener("touchstart", () => (keyboard.RIGHT = true));
+    btnRight.addEventListener("touchend", () => (keyboard.RIGHT = false));
+  }
+
+  if (btnJump) {
+    btnJump.addEventListener("touchstart", () => (keyboard.SPACE = true));
+    btnJump.addEventListener("touchend", () => (keyboard.SPACE = false));
+  }
+
+  if (btnThrow) {
+    btnThrow.addEventListener("touchstart", () => (keyboard.D = true));
+    btnThrow.addEventListener("touchend", () => (keyboard.D = false));
+  }
+}
+
+window.addEventListener("load", setupMobileControls);
