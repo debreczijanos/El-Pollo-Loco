@@ -24,7 +24,7 @@ class World {
     // Erstelle neue Hühner und andere Level-Objekte
     this.level = new Level(
       createEnemies(), // Neue Hühner erstellen
-      [new Cloud()],
+      Array.from({ length: 4 }, () => new Cloud()),
       [...level1.backgroundObjects],
       [...level1.coins],
       [...level1.bottles]

@@ -9,6 +9,20 @@ function checkOrientation() {
   } else {
     warning.style.display = "none";
     gameScreenSwap.style.removeProperty("display");
+    let descriptionMobile = document.querySelector(".description-mobile");
+    if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+      descriptionMobile.style.display = "flex";
+    } else {
+      descriptionMobile.style.display = "none";
+    }
+    let description = document.querySelectorAll(".description");
+    description.forEach((el) => {
+      if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+        el.style.display = "none";
+      } else {
+        el.style.removeProperty("display");
+      }
+    });
   }
 }
 
