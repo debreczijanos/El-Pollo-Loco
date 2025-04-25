@@ -129,6 +129,81 @@ canvas {
   }
 }
 
+.impressum-description {
+  position: absolute;
+  top: 0;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  font-size: 22px;
+  background-color: transparent;
+  z-index: 11;
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    font-family: "zabras", Arial, Helvetica, sans-serif;
+    font-size: 22px;
+  }
+  button:hover {
+    background-color: #ffd740;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+    transition: box-shadow 0.3s ease;
+  }
+}
+
+.impressum-text,
+.game-description {
+  font-family: sans-serif;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 70%;
+  max-height: 480px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  box-sizing: border-box;
+  font-size: 22px;
+  overflow-x: auto;
+  z-index: 12;
+  scrollbar-color: #ffc707 #00000006;
+  scrollbar-width: thin;
+
+  button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ffc707;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 22px;
+  }
+
+  button:hover {
+    background-color: #ffd740;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+    transition: box-shadow 0.3s ease;
+  }
+}
+
 .description-mobile {
   position: absolute;
   bottom: 0;
@@ -205,4 +280,22 @@ canvas {
 
 .sound-btn:hover {
   background-color: #ffd740;
+}
+
+/* Overlays Animation */
+.overlay {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s;
+  position: absolute; /* wichtig: damit es nicht den Klick blockiert */
+}
+
+.overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Aktiver Button */
+.button-active {
+  background-color: #ffc740 !important; /* Oder eine andere schöne Farbe */
 }

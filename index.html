@@ -35,6 +35,7 @@
     <script src="./js/sound-manager.js"></script>
     <script src="./js/game.js"></script>
     <script src="./js/swap-iphone.js"></script>
+    <script src="./js/overlay.js"></script>
 </head>
 
 <body>
@@ -54,6 +55,49 @@
         </div>
 
         <div id="start-screen">
+            <div class="impressum-text overlay" id="impressumOverlay">
+                <button id="closeImpressumOverlay">X</button>
+                <p>Impressum</p>
+                <p>Angaben gemäß § 5 TMG</p>
+                <p>Debreczi János</p>
+                <p>Orsenhauser Str Nr. 30</p>
+                <p>88483 Burgrieden</p>
+                <p>Telefon: 01627991038</p>
+                <p>E-Mail: debreczijanos@yahoo.com</p>
+                <p>Inhaltlich Verantwortlicher gemäß § 55 Abs. 2 RStV: Debrezi János</p>
+                <p>Haftungsausschluss: Die Inhalte dieser Website wurden mit größter Sorgfalt erstellt. Dennoch
+                    übernehmen wir keine Gewähr für die Richtigkeit, Vollständigkeit und Aktualität der
+                    bereitgestellten
+                    Informationen. </p>
+            </div>
+
+            <div class="game-description overlay" id="gameDescriptionOverlay">
+                <button id="closeGameDescriptionOverlay">X</button>
+                <p>Spielbeschreibung</p>
+                <p>In “El Pollo Loco” spielst du gemeinsam mit Peppe, einem mutigen Helden auf einer abenteuerlichen
+                    Reise!
+                    Dein Ziel ist es, so viele Münzen wie möglich zu sammeln, alle Gegner zu besiegen und am Ende den
+                    mächtigen Endboss zu bezwingen.</p>
+                <p>Unterwegs triffst du auf feindliche Hühner, die du auf zwei Arten besiegen kannst: Draufspringen oder
+                    Mit gesammelten Flaschen bewerfen.</p>
+                <p>Die Flaschen sind besonders wichtig:
+                    Nur mit ihnen kannst du den gefährlichen Endboss am Ende des Spiels besiegen!
+                    Darum lohnt es sich, unterwegs möglichst viele Flaschen einzusammeln, damit du gut vorbereitet bist.
+                </p>
+                <p>Viel Spaß beim Spielen!</p>
+                <p>Steuerung:</p>
+                <p>Bewege dich nach links: Pfeil links</p>
+                <p>Bewege dich nach rechts: Pfeil rechts</p>
+                <p>Springen: Leertaste</p>
+                <p>Werfen: D</p>
+                <p>Das Spiel ist für Mobilgeräte optimiert. Du kannst die Steuerung auch über die Schaltflächen auf dem
+                    Bildschirm verwenden.</p>
+            </div>
+            <div class="impressum-description">
+                <button id="impressum">Impressum</button>
+                <button id="gameDescriptiom">Spielbeschreibung</button>
+            </div>
+
             <img class="start-background" src="img/9_intro_outro_screens/start/startscreen_1.png" alt="Start Screen" />
             <button class="restart-btn" onclick="startGame()">Play</button>
             <div class="description">

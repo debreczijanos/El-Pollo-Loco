@@ -223,14 +223,14 @@ class Character extends MovableObject {
   }
 }
 
-let collisionInterval = setInterval(() => {
-  console.log({
-    characterEnergy: world.character.energy,
-    isHurt: world.character.isHurt(),
-    justStomped: world.character.justStomped,
-    statusBarPercentage: world.statusBar.percentage,
-    chickens: world.level.enemies
-      .filter((e) => e instanceof Chicken)
-      .map((c) => ({ isDead: c.isDead, ignoreCollisions: c.ignoreCollisions })),
-  });
-}, 500);
+// let collisionInterval = setInterval(() => {
+//   console.log({
+//     characterEnergy: world.character.energy,
+//     isHurt: world.character.isHurt(),
+//     justStomped: world.character.justStomped,
+//     statusBarPercentage: world.statusBar.percentage,
+//     chickens: world.level.enemies
+//       .filter((e) => e instanceof Chicken)
+//       .map((c) => ({ isDead: c.isDead, ignoreCollisions: c.ignoreCollisions })),
+//   });
+// }, 500);
