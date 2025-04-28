@@ -23,7 +23,7 @@
     <script src="./models/coins.class.js"></script>
     <script src="./models/bottle.class.js"></script>
     <script src="./models/world.class.js"></script>
-    <script src="./models/background.object.class.js"></script>
+    <script src="./models/background-object.class.js"></script>
     <script src="./models/keyboard.class.js"></script>
     <script src="./models/throwable-object.class.js"></script>
 
@@ -74,7 +74,7 @@
             <div class="game-description overlay" id="gameDescriptionOverlay">
                 <button id="closeGameDescriptionOverlay">X</button>
                 <p>Spielbeschreibung</p>
-                <p>In “El Pollo Loco” spielst du gemeinsam mit Peppe, einem mutigen Helden auf einer abenteuerlichen
+                <p>In "El Pollo Loco" spielst du gemeinsam mit Peppe, einem mutigen Helden auf einer abenteuerlichen
                     Reise!
                     Dein Ziel ist es, so viele Münzen wie möglich zu sammeln, alle Gegner zu besiegen und am Ende den
                     mächtigen Endboss zu bezwingen.</p>
@@ -142,9 +142,8 @@
             soundOn = !soundOn;
             this.textContent = soundOn ? "🔊" : "🔇";
 
-            // Wenn du einen Sound-Manager hast, mute/unmute hier:
-            if (typeof soundManager !== "undefined") {
-                soundManager.toggleMute(soundOn); // Implementiere ggf. in sound-manager.js
+            if (typeof game !== "undefined" && game.soundManager) {
+                game.soundManager.toggleMute();
             }
         });
     </script>

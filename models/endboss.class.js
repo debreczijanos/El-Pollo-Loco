@@ -279,9 +279,12 @@ class Endboss extends MovableObject {
         i++;
       } else {
         clearInterval(interval);
-        if (callback) callback();
+        // Warte einen Moment, damit die letzte Animation zu sehen ist
+        setTimeout(() => {
+          if (callback) callback();
+        }, 1000);
       }
-    }, 200);
+    }, 500); // Langsamere Animation (500ms pro Frame)
   }
 
   fallDown() {

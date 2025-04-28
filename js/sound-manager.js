@@ -6,13 +6,27 @@ class SoundManager {
     this.loadSounds();
   }
 
+  /**
+   * Initializes and loads all sound files with their configurations.
+   */
   loadSounds() {
-    // Hintergrundmusik
+    this.loadBackgroundMusic();
+    this.loadGameSounds();
+  }
+
+  /**
+   * Loads and configures the background music.
+   */
+  loadBackgroundMusic() {
     this.backgroundMusic = new Audio("audio/background-music.mp3");
     this.backgroundMusic.loop = true;
     this.backgroundMusic.volume = 0.3;
+  }
 
-    // Soundeffekte
+  /**
+   * Loads and configures all game sound effects.
+   */
+  loadGameSounds() {
     this.sounds = {
       jump: new Audio("audio/jump.mp3"),
       throw: new Audio("audio/throw.mp3"),
@@ -25,30 +39,42 @@ class SoundManager {
       hurt: new Audio("audio/hurt.mp3"),
     };
 
-    // Setze Lautstärke für alle Soundeffekte
+    this.configureSoundVolumes();
+    this.configureSoundLoops();
+  }
+
+  /**
+   * Sets the volume for all sound effects.
+   */
+  configureSoundVolumes() {
     Object.values(this.sounds).forEach((sound) => {
       sound.volume = 0.5;
     });
+  }
 
-    // Walking-Sound auf Loop setzen
+  /**
+   * Configures loop settings for sounds that need to loop.
+   */
+  configureSoundLoops() {
     this.sounds.walking.loop = true;
   }
 
+  /**
+   * Plays a specific sound effect if not muted.
+   * @param {string} soundName - The name of the sound to play.
+   */
   playSound(soundName) {
     if (this.isMuted) return;
 
     const sound = this.sounds[soundName];
     if (sound) {
-      // Setze den Sound zurück und spiele ihn ab
       sound.currentTime = 0;
 
-      // Für den Walking-Sound: Stelle sicher, dass er sofort abgespielt wird
       if (soundName === "walking") {
         sound.play().catch((error) => {
           console.warn(`Fehler beim Abspielen von ${soundName}:`, error);
         });
       } else {
-        // Für andere Sounds: Normales Abspielen
         sound.play().catch((error) => {
           console.warn(`Fehler beim Abspielen von ${soundName}:`, error);
         });
@@ -56,6 +82,9 @@ class SoundManager {
     }
   }
 
+  /**
+   * Starts playing the background music if not muted.
+   */
   startBackgroundMusic() {
     if (this.isMuted) return;
 
@@ -66,6 +95,9 @@ class SoundManager {
     }
   }
 
+  /**
+   * Stops the background music and resets its playback position.
+   */
   stopBackgroundMusic() {
     if (this.backgroundMusic) {
       this.backgroundMusic.pause();
@@ -73,11 +105,19 @@ class SoundManager {
     }
   }
 
+  /**
+   * Toggles the mute state of all sounds.
+   * @returns {boolean} - The new mute state.
+   */
   toggleMute() {
     this.isMuted = !this.isMuted;
 
     if (this.isMuted) {
       this.stopBackgroundMusic();
+      Object.values(this.sounds).forEach((sound) => {
+        sound.pause();
+        sound.currentTime = 0;
+      });
     } else {
       this.startBackgroundMusic();
     }
@@ -85,12 +125,15 @@ class SoundManager {
     return this.isMuted;
   }
 
+  /**
+   * Sets the volume for all sounds.
+   * @param {number} volume - The volume level between 0 and 1.
+   */
   setVolume(volume) {
-    // Volume sollte zwischen 0 und 1 liegen
     const normalizedVolume = Math.max(0, Math.min(1, volume));
 
     if (this.backgroundMusic) {
-      this.backgroundMusic.volume = normalizedVolume * 0.3; // Hintergrundmusik etwas leiser
+      this.backgroundMusic.volume = normalizedVolume * 0.3;
     }
 
     Object.values(this.sounds).forEach((sound) => {
