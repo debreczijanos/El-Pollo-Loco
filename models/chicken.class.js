@@ -1,15 +1,30 @@
+/**
+ * Represents a chicken enemy in the game.
+ * Handles the basic chicken behavior including movement, animation, and death.
+ * @extends MovableObject
+ */
 class Chicken extends MovableObject {
+  /** @type {number} Y-position of the chicken */
   y = 360;
+  /** @type {number} Height of the chicken in pixels */
   height = 60;
+  /** @type {number} Width of the chicken in pixels */
   width = 60;
+  /** @type {boolean} Flag indicating if the chicken is dead */
   isDead = false;
+  /** @type {string[]} Array of image paths for walking animation */
   IMAGES_WALKING = [
     "img/3_enemies_chicken/chicken_normal/1_walk/1_w.png",
     "img/3_enemies_chicken/chicken_normal/1_walk/2_w.png",
     "img/3_enemies_chicken/chicken_normal/1_walk/3_w.png",
   ];
+  /** @type {string[]} Array of image paths for death animation */
   IMAGES_DEAD = ["img/3_enemies_chicken/chicken_small/2_dead/dead.png"];
 
+  /**
+   * Creates a new chicken instance.
+   * Sets up initial position, speed, and loads necessary images.
+   */
   constructor() {
     super().loadImage(this.IMAGES_WALKING[0]);
     this.loadImages(this.IMAGES_WALKING);
@@ -21,6 +36,10 @@ class Chicken extends MovableObject {
     this.animate();
   }
 
+  /**
+   * Sets up the animation and movement intervals for the chicken.
+   * Handles continuous left movement and walking animation.
+   */
   animate() {
     this.moveInterval = setInterval(() => {
       if (!this.isDead) this.moveLeft();
@@ -31,6 +50,10 @@ class Chicken extends MovableObject {
     }, 200);
   }
 
+  /**
+   * Handles the chicken being hit.
+   * Plays death animation, stops movement, and removes the chicken from the game.
+   */
   hit() {
     if (this.isDead) return;
     this.isDead = true;
@@ -39,22 +62,24 @@ class Chicken extends MovableObject {
       world.soundManager.playSound("hit");
     }
 
-    this.loadImage(this.IMAGES_DEAD[0]); // Setze Todesbild sofort
+    this.loadImage(this.IMAGES_DEAD[0]);
     this.speed = 0;
     this.y += 10;
 
-    clearInterval(this.moveInterval); // Stoppt Bewegung
-    clearInterval(this.animationInterval); // Stoppt Animation
+    clearInterval(this.moveInterval);
+    clearInterval(this.animationInterval);
 
     setTimeout(() => {
       let index = world.level.enemies.indexOf(this);
       if (index > -1) {
-        world.level.enemies.splice(index, 1); // Entferne das Chicken nach Tod
+        world.level.enemies.splice(index, 1);
       }
     }, 500);
   }
 
-  // Diese Methode stoppt alle laufenden Animationen
+  /**
+   * Stops all running animations by clearing all intervals.
+   */
   stopAnimation() {
     let highestIntervalId = setInterval(() => {}, 0);
     for (let i = 0; i < highestIntervalId; i++) {
@@ -62,9 +87,12 @@ class Chicken extends MovableObject {
     }
   }
 
-  // Diese Methode stoppt die Bewegung vollständig
+  /**
+   * Completely stops the chicken's movement.
+   * Sets speed to 0 and overrides the moveLeft method.
+   */
   stopMovement() {
     this.speed = 0;
-    this.moveLeft = function () {}; // Verhindert weiteres Laufen
+    this.moveLeft = function () {};
   }
 }

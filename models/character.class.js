@@ -1,9 +1,21 @@
+/**
+ * Represents the main character (Pepe) in the game.
+ * Handles all character-specific animations, movements, and interactions.
+ * @extends MovableObject
+ */
 class Character extends MovableObject {
+  /** @type {number} Height of the character in pixels */
   height = 250;
+  /** @type {number} Initial y-position of the character */
   y = 80;
+  /** @type {number} Movement speed of the character */
   speed = 10;
+  /** @type {number} Number of bottles collected by the character */
   collectedBottles = 0;
+  /** @type {boolean} Flag indicating if the character just stomped an enemy */
   justStomped = false;
+
+  /** @type {string[]} Array of image paths for walking animation */
   IMAGES_WALKING = [
     "img/2_character_pepe/2_walk/W-21.png",
     "img/2_character_pepe/2_walk/W-22.png",
@@ -12,6 +24,8 @@ class Character extends MovableObject {
     "img/2_character_pepe/2_walk/W-25.png",
     "img/2_character_pepe/2_walk/W-26.png",
   ];
+
+  /** @type {string[]} Array of image paths for jumping animation */
   IMAGES_JUMPING = [
     "img/2_character_pepe/3_jump/J-31.png",
     "img/2_character_pepe/3_jump/J-32.png",
@@ -23,6 +37,8 @@ class Character extends MovableObject {
     "img/2_character_pepe/3_jump/J-38.png",
     "img/2_character_pepe/3_jump/J-39.png",
   ];
+
+  /** @type {string[]} Array of image paths for death animation */
   IMAGES_DEAD = [
     "img/2_character_pepe/5_dead/D-51.png",
     "img/2_character_pepe/5_dead/D-52.png",
@@ -32,11 +48,15 @@ class Character extends MovableObject {
     "img/2_character_pepe/5_dead/D-56.png",
     "img/2_character_pepe/5_dead/D-57.png",
   ];
+
+  /** @type {string[]} Array of image paths for hurt animation */
   IMAGES_HURT = [
     "img/2_character_pepe/4_hurt/H-41.png",
     "img/2_character_pepe/4_hurt/H-42.png",
     "img/2_character_pepe/4_hurt/H-43.png",
   ];
+
+  /** @type {string[]} Array of image paths for idle animation */
   IMAGES_IDLE = [
     "img/2_character_pepe/1_idle/idle/I-1.png",
     "img/2_character_pepe/1_idle/idle/I-2.png",
@@ -49,6 +69,8 @@ class Character extends MovableObject {
     "img/2_character_pepe/1_idle/idle/I-9.png",
     "img/2_character_pepe/1_idle/idle/I-10.png",
   ];
+
+  /** @type {string[]} Array of image paths for long idle animation */
   IMAGES_LONG_IDLE = [
     "img/2_character_pepe/1_idle/long_idle/I-11.png",
     "img/2_character_pepe/1_idle/long_idle/I-12.png",
@@ -62,12 +84,21 @@ class Character extends MovableObject {
     "img/2_character_pepe/1_idle/long_idle/I-20.png",
   ];
 
+  /** @type {World} Reference to the game world */
   world;
+  /** @type {boolean} Flag indicating if death animation has been played */
   hasPlayedDeathAnimation = false;
+  /** @type {number} Current frame of death animation */
   deathAnimationFrame = 0;
+  /** @type {boolean} Flag indicating if walking sound is currently playing */
   isWalkingSoundPlaying = false;
+  /** @type {boolean} Flag indicating if hurt sound has been played */
   hasPlayedHurtSound = false;
 
+  /**
+   * Creates a new Character instance.
+   * Loads all necessary images and sets up initial state.
+   */
   constructor() {
     super().loadImage("img/2_character_pepe/2_walk/W-21.png");
     this.loadImages(this.IMAGES_WALKING);
@@ -80,11 +111,18 @@ class Character extends MovableObject {
     this.animate();
   }
 
+  /**
+   * Starts the character's animation and movement intervals.
+   */
   animate() {
     this.setupMovementInterval();
     this.setupAnimationInterval();
   }
 
+  /**
+   * Sets up the interval for character movement.
+   * Checks if character is dead before handling movement.
+   */
   setupMovementInterval() {
     setInterval(() => {
       if (this.isDead()) return;
@@ -92,7 +130,20 @@ class Character extends MovableObject {
     }, 1000 / 60);
   }
 
+  /**
+   * Handles all character movement including horizontal movement, jumping, and camera updates.
+   */
   handleMovement() {
+    this.handleHorizontalMovement();
+    this.handleJump();
+    this.updateCameraPosition();
+  }
+
+  /**
+   * Handles horizontal movement based on keyboard input.
+   * Updates character position and direction.
+   */
+  handleHorizontalMovement() {
     let isMoving = false;
 
     if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
@@ -105,19 +156,41 @@ class Character extends MovableObject {
       isMoving = true;
     }
 
-    // Sound-Steuerung basierend auf Bewegung
+    this.handleWalkingSound(isMoving);
+  }
+
+  /**
+   * Controls the walking sound based on character movement.
+   * @param {boolean} isMoving - Whether the character is currently moving
+   */
+  handleWalkingSound(isMoving) {
     if (isMoving && !this.isWalkingSoundPlaying) {
       this.playWalkingSound();
     } else if (!isMoving && this.isWalkingSoundPlaying) {
       this.stopWalkingSound();
     }
+  }
 
+  /**
+   * Handles character jumping when space key is pressed and character is on ground.
+   */
+  handleJump() {
     if (this.world.keyboard.SPACE && !this.isAboveGround()) {
       this.jump();
     }
+  }
+
+  /**
+   * Updates the camera position based on character's x-position.
+   */
+  updateCameraPosition() {
     this.world.camera_x = -this.x + 100;
   }
 
+  /**
+   * Sets up the interval for character animations.
+   * Handles different animation states based on character condition.
+   */
   setupAnimationInterval() {
     let idleTime = 0;
     setInterval(() => {
@@ -129,6 +202,10 @@ class Character extends MovableObject {
     }, 50);
   }
 
+  /**
+   * Handles the death animation sequence.
+   * Ensures death animation is played only once.
+   */
   handleDeathAnimation() {
     if (!this.hasPlayedDeathAnimation) {
       this.hasPlayedDeathAnimation = true;
@@ -136,6 +213,10 @@ class Character extends MovableObject {
     }
   }
 
+  /**
+   * Plays the death animation sequence.
+   * Updates the character's image based on death animation frames.
+   */
   playDeathAnimation() {
     this.deathAnimationInterval = setInterval(() => {
       if (this.deathAnimationFrame < this.IMAGES_DEAD.length) {
@@ -148,6 +229,11 @@ class Character extends MovableObject {
     }, 100);
   }
 
+  /**
+   * Updates the character's animation state based on current conditions.
+   * @param {number} idleTime - Current idle time in milliseconds
+   * @returns {number} Updated idle time
+   */
   updateAnimationState(idleTime) {
     if (this.isHurt()) {
       this.playAnimation(this.IMAGES_HURT);
@@ -166,6 +252,10 @@ class Character extends MovableObject {
     }
   }
 
+  /**
+   * Updates the idle animation based on idle time.
+   * @param {number} idleTime - Current idle time in milliseconds
+   */
   updateIdleAnimation(idleTime) {
     if (idleTime > 4000) {
       this.playAnimation(this.IMAGES_LONG_IDLE);
@@ -174,6 +264,9 @@ class Character extends MovableObject {
     }
   }
 
+  /**
+   * Makes the character jump and plays jump sound.
+   */
   jump() {
     this.speedY = 30;
     if (this.world && this.world.soundManager) {
@@ -181,20 +274,23 @@ class Character extends MovableObject {
     }
   }
 
+  /**
+   * Stops all character animations and sounds.
+   */
   stopAnimation() {
     if (this.deathAnimationInterval) {
       clearInterval(this.deathAnimationInterval);
     }
-    // Stoppe alle anderen Animationen
     let highestIntervalId = setInterval(() => {}, 0);
     for (let i = 0; i < highestIntervalId; i++) {
       clearInterval(i);
     }
-
-    // Stoppe den Walking-Sound
     this.stopWalkingSound();
   }
 
+  /**
+   * Plays the walking sound effect.
+   */
   playWalkingSound() {
     if (this.world && this.world.soundManager) {
       this.world.soundManager.playSound("walking");
@@ -202,6 +298,9 @@ class Character extends MovableObject {
     }
   }
 
+  /**
+   * Stops the walking sound effect.
+   */
   stopWalkingSound() {
     if (this.world && this.world.soundManager && this.isWalkingSoundPlaying) {
       this.world.soundManager.sounds.walking.pause();
@@ -210,27 +309,18 @@ class Character extends MovableObject {
     }
   }
 
+  /**
+   * Plays the hurt sound effect.
+   * Ensures hurt sound is played only once per hit.
+   */
   playHurtSound() {
     if (this.world && this.world.soundManager && !this.hasPlayedHurtSound) {
       this.world.soundManager.playSound("hurt");
       this.hasPlayedHurtSound = true;
 
-      // Setze den Flag zurück, damit der Sound beim nächsten Verletztwerden wieder abgespielt wird
       setTimeout(() => {
         this.hasPlayedHurtSound = false;
       }, 1000);
     }
   }
 }
-
-// let collisionInterval = setInterval(() => {
-//   console.log({
-//     characterEnergy: world.character.energy,
-//     isHurt: world.character.isHurt(),
-//     justStomped: world.character.justStomped,
-//     statusBarPercentage: world.statusBar.percentage,
-//     chickens: world.level.enemies
-//       .filter((e) => e instanceof Chicken)
-//       .map((c) => ({ isDead: c.isDead, ignoreCollisions: c.ignoreCollisions })),
-//   });
-// }, 500);

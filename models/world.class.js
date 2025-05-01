@@ -1,29 +1,95 @@
+/**
+ * Repräsentiert die Spielwelt und verwaltet alle Spielobjekte.
+ * Koordiniert die Interaktionen zwischen Charakter, Gegnern und Objekten.
+ */
 class World {
+  /**
+   * Der Hauptcharakter des Spiels.
+   * @type {Character}
+   */
   character;
-  level;
-  canvas;
-  ctx;
-  keyboard;
-  camera_x = 0;
-  statusBar;
-  statusBarCoins;
-  statusBarBottle;
-  statusBarEndboss;
-  throwableObjects = [];
-  game; // Referenz auf die Game-Klasse
 
+  /**
+   * Das aktuelle Level mit allen Objekten.
+   * @type {Level}
+   */
+  level;
+
+  /**
+   * Das Canvas-Element für die Spielgrafik.
+   * @type {HTMLCanvasElement}
+   */
+  canvas;
+
+  /**
+   * Der 2D-Kontext des Canvas für das Zeichnen.
+   * @type {CanvasRenderingContext2D}
+   */
+  ctx;
+
+  /**
+   * Die Tastatureingaben des Spielers.
+   * @type {Keyboard}
+   */
+  keyboard;
+
+  /**
+   * Die X-Position der Kamera.
+   * @type {number}
+   */
+  camera_x = 0;
+
+  /**
+   * Die Statusleiste für die Gesundheit.
+   * @type {StatusBar}
+   */
+  statusBar;
+
+  /**
+   * Die Statusleiste für die Münzen.
+   * @type {StatusBarCoins}
+   */
+  statusBarCoins;
+
+  /**
+   * Die Statusleiste für die Flaschen.
+   * @type {StatusBarBottle}
+   */
+  statusBarBottle;
+
+  /**
+   * Die Statusleiste für den Endboss.
+   * @type {StatusBarEndboss}
+   */
+  statusBarEndboss;
+
+  /**
+   * Array von werfbaren Objekten (Flaschen).
+   * @type {ThrowableObject[]}
+   */
+  throwableObjects = [];
+
+  /**
+   * Referenz auf die Game-Klasse.
+   * @type {Game}
+   */
+  game;
+
+  /**
+   * Erstellt eine neue Spielwelt.
+   * @param {HTMLCanvasElement} canvas - Das Canvas-Element für die Grafik
+   * @param {Keyboard} keyboard - Die Tastatureingaben
+   * @param {Game} game - Die Hauptspielklasse
+   */
   constructor(canvas, keyboard, game) {
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
     this.keyboard = keyboard;
-    this.game = game; // Speichere die Referenz auf die Game-Klasse
+    this.game = game;
 
-    // Initialisiere alle Objekte neu
     this.character = new Character();
-
-    // Erstelle neue Hühner und andere Level-Objekte
     this.level = new Level(
-      createEnemies(), // Neue Hühner erstellen
+      createEnemies(),
       Array.from({ length: 4 }, () => new Cloud()),
       [...level1.backgroundObjects],
       [...level1.coins],
@@ -40,12 +106,19 @@ class World {
     this.run();
   }
 
+  /**
+   * Setzt die Welt-Referenz für alle beweglichen Objekte.
+   */
   setWorld() {
     this.character.world = this;
     this.endboss = new Endboss(this.statusBarEndboss, this);
     this.level.enemies.push(this.endboss);
   }
 
+  /**
+   * Startet die Hauptspielschleife.
+   * Überprüft regelmäßig Kollisionen und Spielzustände.
+   */
   run() {
     this.gameInterval = setInterval(() => {
       if (this.character.isDead()) {
@@ -54,19 +127,108 @@ class World {
       }
       this.checkCollisions();
       this.checkThrowableObjects();
-      // Nur ausführen, wenn es noch Münzen gibt
       if (this.level.coins?.length > 0) {
         this.checkCoinCollection();
       }
-      this.checkBottleCollection(); // Hier wird geprüft, ob Bottles gesammelt werden
+      this.checkBottleCollection();
     }, 200);
   }
 
+  /**
+   * Zeichnet alle Objekte der Spielwelt.
+   */
+  draw() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.ctx.translate(this.camera_x, 0);
+    this.addObjectsToMap(this.level.backgroundObjects);
+    this.addObjectsToMap(this.level.clouds);
+
+    this.ctx.translate(-this.camera_x, 0);
+    this.addToMap(this.statusBar);
+    this.addToMap(this.statusBarCoins);
+    this.addToMap(this.statusBarBottle);
+    this.addToMap(this.statusBarEndboss);
+    this.ctx.translate(this.camera_x, 0);
+
+    this.addToMap(this.character);
+    this.addObjectsToMap(this.level.coins);
+    this.addObjectsToMap(this.level.bottles);
+    this.addObjectsToMap(this.level.enemies);
+    this.addObjectsToMap(this.throwableObjects);
+
+    this.ctx.translate(-this.camera_x, 0);
+
+    this.checkCollisions();
+
+    if (this.game && this.game.checkVictory) {
+      this.game.checkVictory();
+    }
+
+    let self = this;
+    this.animationFrame = requestAnimationFrame(function () {
+      self.draw();
+    });
+  }
+
+  /**
+   * Fügt ein einzelnes Objekt zur Zeichenfläche hinzu.
+   * @param {DrawableObject} mo - Das zu zeichnende Objekt
+   */
+  addToMap(mo) {
+    if (mo.otherDirection) {
+      this.flipImage(mo);
+    }
+
+    mo.draw(this.ctx);
+    mo.drawFrame(this.ctx);
+
+    if (mo.otherDirection) {
+      this.flipImageBack(mo);
+    }
+  }
+
+  /**
+   * Fügt mehrere Objekte zur Zeichenfläche hinzu.
+   * @param {DrawableObject[]} objects - Array von zu zeichnenden Objekten
+   */
+  addObjectsToMap(objects) {
+    objects.forEach((o) => {
+      this.addToMap(o);
+    });
+  }
+
+  /**
+   * Spiegelt ein Bild horizontal.
+   * @param {DrawableObject} mo - Das zu spiegelnde Objekt
+   */
+  flipImage(mo) {
+    this.ctx.save();
+    this.ctx.translate(mo.width, 0);
+    this.ctx.scale(-1, 1);
+    mo.x = mo.x * -1;
+  }
+
+  /**
+   * Stellt die ursprüngliche Bildausrichtung wieder her.
+   * @param {DrawableObject} mo - Das Objekt
+   */
+  flipImageBack(mo) {
+    mo.x = mo.x * -1;
+    this.ctx.restore();
+  }
+
+  /**
+   * Überprüft die Kollisionen zwischen Objekten.
+   */
   checkCollisions() {
     this.checkStompCollisions();
     this.checkSideCollisions();
   }
 
+  /**
+   * Überprüft Kollisionen zwischen Charakter und Gegnern.
+   */
   checkStompCollisions() {
     const charBottom = this.character.y + this.character.height;
     const charTop = this.character.y;
@@ -84,39 +246,9 @@ class World {
     });
   }
 
-  isStompingOnEnemy(enemy, charTop, charBottom, charLeft, charRight) {
-    const enemyTop = enemy.y;
-    const enemyLeft = enemy.x;
-    const enemyRight = enemy.x + enemy.width;
-
-    const isSmallChicken = enemy instanceof ChickenSmall;
-    const heightFactor = isSmallChicken ? 0.7 : 0.6;
-
-    return (
-      this.character.isColliding(enemy) &&
-      this.character.speedY >= 0 &&
-      charBottom <= enemyTop + enemy.height * heightFactor &&
-      charTop < enemyTop + enemy.height * heightFactor &&
-      (!isSmallChicken ||
-        (charRight > enemyLeft + enemy.width * 0.2 &&
-          charLeft < enemyRight - enemy.width * 0.2))
-    );
-  }
-
-  handleStompCollision(enemy) {
-    enemy.hit();
-    this.character.speedY = -15;
-
-    enemy.isDead = true;
-    enemy.ignoreCollisions = true;
-
-    this.character.justStomped = true;
-
-    setTimeout(() => {
-      this.character.justStomped = false;
-    }, 500);
-  }
-
+  /**
+   * Überprüft Kollisionen zwischen Charakter und Gegnern.
+   */
   checkSideCollisions() {
     const charBottom = this.character.y + this.character.height;
     const charTop = this.character.y;
@@ -141,6 +273,49 @@ class World {
     });
   }
 
+  /**
+   * Überprüft Kollisionen zwischen Charakter und Gegnern.
+   */
+  isStompingOnEnemy(enemy, charTop, charBottom, charLeft, charRight) {
+    const enemyTop = enemy.y;
+    const enemyLeft = enemy.x;
+    const enemyRight = enemy.x + enemy.width;
+
+    const isSmallChicken = enemy instanceof ChickenSmall;
+    const heightFactor = isSmallChicken ? 0.7 : 0.6;
+
+    return (
+      this.character.isColliding(enemy) &&
+      this.character.speedY >= 0 &&
+      charBottom <= enemyTop + enemy.height * heightFactor &&
+      charTop < enemyTop + enemy.height * heightFactor &&
+      (!isSmallChicken ||
+        (charRight > enemyLeft + enemy.width * 0.2 &&
+          charLeft < enemyRight - enemy.width * 0.2))
+    );
+  }
+
+  /**
+   * Behandelt die Kollision zwischen Charakter und Gegner.
+   * @param {MovableObject} enemy - Der getroffene Gegner
+   */
+  handleStompCollision(enemy) {
+    enemy.hit();
+    this.character.speedY = -15;
+
+    enemy.isDead = true;
+    enemy.ignoreCollisions = true;
+
+    this.character.justStomped = true;
+
+    setTimeout(() => {
+      this.character.justStomped = false;
+    }, 500);
+  }
+
+  /**
+   * Überprüft Kollisionen zwischen Charakter und Gegnern.
+   */
   isSideCollidingWithEnemy(enemy, charTop, charBottom, charLeft, charRight) {
     const enemyTop = enemy.y;
     const enemyBottom = enemy.y + enemy.height;
@@ -159,6 +334,9 @@ class World {
     );
   }
 
+  /**
+   * Behandelt den Treffer des Charakters.
+   */
   handleSideCollision() {
     if (!this.character.isHurt()) {
       this.character.hit();
@@ -166,6 +344,9 @@ class World {
     }
   }
 
+  /**
+   * Überprüft und aktualisiert den Zustand der werfbaren Objekte.
+   */
   checkThrowableObjects() {
     if (this.keyboard.D && this.character.collectedBottles > 0) {
       let throwDirection = this.character.otherDirection ? -1 : 1;
@@ -174,84 +355,18 @@ class World {
         this.character.y + 130,
         throwDirection
       );
-      bottle.speedX = 13 * throwDirection; // Damit sich die Flasche in die richtige Richtung bewegt
+      bottle.speedX = 13 * throwDirection;
       this.throwableObjects.push(bottle);
-      this.character.collectedBottles--; // Nach dem Werfen eine Bottle abziehen
-
-      // Statusbar aktualisieren
+      this.character.collectedBottles--;
       this.statusBarBottle.setPrecentage(
         (this.character.collectedBottles / 5) * 100
       );
     }
   }
 
-  draw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    this.ctx.translate(this.camera_x, 0);
-    this.addObjectsToMap(this.level.backgroundObjects);
-    this.addObjectsToMap(this.level.clouds);
-
-    this.ctx.translate(-this.camera_x, 0);
-    this.addToMap(this.statusBar);
-    this.addToMap(this.statusBarCoins);
-    this.addToMap(this.statusBarBottle);
-    this.addToMap(this.statusBarEndboss);
-    this.ctx.translate(this.camera_x, 0);
-
-    this.addToMap(this.character);
-    this.addObjectsToMap(this.level.coins);
-    this.addObjectsToMap(this.level.bottles);
-
-    this.addObjectsToMap(this.level.enemies);
-    this.addObjectsToMap(this.throwableObjects);
-
-    this.ctx.translate(-this.camera_x, 0);
-
-    this.checkCollisions();
-
-    // Prüfe, ob der Spieler gewonnen hat
-    if (this.game && this.game.checkVictory) {
-      this.game.checkVictory();
-    }
-
-    let self = this;
-    this.animationFrame = requestAnimationFrame(function () {
-      self.draw();
-    });
-  }
-
-  addObjectsToMap(objects) {
-    objects.forEach((o) => {
-      this.addToMap(o);
-    });
-  }
-
-  addToMap(mo) {
-    if (mo.otherDirection) {
-      this.flipImage(mo);
-    }
-
-    mo.draw(this.ctx);
-    mo.drawFrame(this.ctx);
-
-    if (mo.otherDirection) {
-      this.flipImageBack(mo);
-    }
-  }
-
-  flipImage(mo) {
-    this.ctx.save();
-    this.ctx.translate(mo.width, 0);
-    this.ctx.scale(-1, 1);
-    mo.x = mo.x * -1;
-  }
-
-  flipImageBack(mo) {
-    mo.x = mo.x * -1;
-    this.ctx.restore();
-  }
-
+  /**
+   * Überprüft das Einsammeln von Münzen.
+   */
   checkCoinCollection() {
     if (!this.level.coins?.length) return;
 
@@ -271,17 +386,20 @@ class World {
     );
   }
 
+  /**
+   * Überprüft das Einsammeln von Flaschen.
+   */
   checkBottleCollection() {
     if (!this.level.bottles?.length) return;
 
     if (this.character.collectedBottles < 5) {
       this.level.bottles = this.level.bottles.filter((bottle) => {
         if (this.character.isColliding(bottle)) {
-          this.character.collectedBottles++; // Eine Bottle aufheben
+          this.character.collectedBottles++;
           this.statusBarBottle.setPrecentage(
             (this.character.collectedBottles / 5) * 100
           );
-          return false; // Entferne die eingesammelte Bottle
+          return false;
         }
         return true;
       });

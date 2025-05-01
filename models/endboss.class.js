@@ -1,19 +1,72 @@
+/**
+ * Repräsentiert den Endboss des Spiels.
+ * Der Endboss ist ein spezieller Gegner mit einzigartigen Fähigkeiten wie Angriffen und Sprüngen.
+ * @extends MovableObject
+ */
 class Endboss extends MovableObject {
+  /**
+   * Gibt an, ob der Endboss tot ist.
+   * @type {boolean}
+   */
   isDead = false;
-  isAttacking = false;
-  height = 400;
-  width = 250;
-  y = 55;
-  directionLeft = true;
-  otherDirection = true;
-  energy = 100; // Assuming initial energy is 100
 
+  /**
+   * Gibt an, ob der Endboss gerade angreift.
+   * @type {boolean}
+   */
+  isAttacking = false;
+
+  /**
+   * Die Höhe des Endbosses in Pixeln.
+   * @type {number}
+   */
+  height = 400;
+
+  /**
+   * Die Breite des Endbosses in Pixeln.
+   * @type {number}
+   */
+  width = 250;
+
+  /**
+   * Die Y-Position des Endbosses.
+   * @type {number}
+   */
+  y = 55;
+
+  /**
+   * Gibt an, ob der Endboss nach links schaut.
+   * @type {boolean}
+   */
+  directionLeft = true;
+
+  /**
+   * Gibt an, ob der Endboss in die andere Richtung schaut.
+   * @type {boolean}
+   */
+  otherDirection = true;
+
+  /**
+   * Die Energie des Endbosses.
+   * @type {number}
+   */
+  energy = 100;
+
+  /**
+   * Array von Bildpfaden für die Geh-Animation.
+   * @type {string[]}
+   */
   IMAGES_WALKING = [
     "img/4_enemie_boss_chicken/1_walk/G1.png",
     "img/4_enemie_boss_chicken/1_walk/G2.png",
     "img/4_enemie_boss_chicken/1_walk/G3.png",
     "img/4_enemie_boss_chicken/1_walk/G4.png",
   ];
+
+  /**
+   * Array von Bildpfaden für die Alarm-Animation.
+   * @type {string[]}
+   */
   IMAGES_ALERT = [
     "img/4_enemie_boss_chicken/2_alert/G5.png",
     "img/4_enemie_boss_chicken/2_alert/G6.png",
@@ -24,6 +77,11 @@ class Endboss extends MovableObject {
     "img/4_enemie_boss_chicken/2_alert/G11.png",
     "img/4_enemie_boss_chicken/2_alert/G12.png",
   ];
+
+  /**
+   * Array von Bildpfaden für die Angriffs-Animation.
+   * @type {string[]}
+   */
   IMAGES_ATTACK = [
     "img/4_enemie_boss_chicken/3_attack/G13.png",
     "img/4_enemie_boss_chicken/3_attack/G14.png",
@@ -34,17 +92,32 @@ class Endboss extends MovableObject {
     "img/4_enemie_boss_chicken/3_attack/G19.png",
     "img/4_enemie_boss_chicken/3_attack/G20.png",
   ];
+
+  /**
+   * Array von Bildpfaden für die Todes-Animation.
+   * @type {string[]}
+   */
   IMAGES_DEAD = [
     "img/4_enemie_boss_chicken/5_dead/G24.png",
     "img/4_enemie_boss_chicken/5_dead/G25.png",
     "img/4_enemie_boss_chicken/5_dead/G26.png",
   ];
+
+  /**
+   * Array von Bildpfaden für die Verletzungs-Animation.
+   * @type {string[]}
+   */
   IMAGES_HURT = [
     "img/4_enemie_boss_chicken/4_hurt/G21.png",
     "img/4_enemie_boss_chicken/4_hurt/G22.png",
     "img/4_enemie_boss_chicken/4_hurt/G23.png",
   ];
 
+  /**
+   * Erstellt eine neue Instanz des Endbosses.
+   * @param {StatusBar} statusBar - Die Statusleiste für den Endboss
+   * @param {World} world - Die Spielwelt
+   */
   constructor(statusBar, world) {
     super().loadImage(this.IMAGES_WALKING[0]);
     this.loadImages(this.IMAGES_WALKING);
@@ -58,77 +131,81 @@ class Endboss extends MovableObject {
     this.animate();
   }
 
+  /**
+   * Handles the endboss being hit by a bottle.
+   * Manages damage, death state, and animations.
+   */
   takeHitFromBottle() {
     if (this.isDead) return;
 
+    this.applyDamage();
+    this.checkDeathState();
+    this.updateStatusBar();
+  }
+
+  /**
+   * Applies damage to the endboss and updates last hit time.
+   */
+  applyDamage() {
     this.energy -= 20;
     this.lastHit = new Date().getTime();
+  }
 
+  /**
+   * Checks if the endboss should die and handles death sequence.
+   */
+  checkDeathState() {
     if (this.energy <= 0) {
-      this.energy = 0;
-      this.isDead = true;
-
-      // Spiele Victory-Sound ab
-      if (this.world && this.world.soundManager) {
-        this.world.soundManager.playSound("victory");
-        this.world.soundManager.stopBackgroundMusic();
-      }
-
-      this.animateDeath(() => {
-        // Nach der Todesanimation
-        setTimeout(() => {
-          let index = this.world.level.enemies.indexOf(this);
-          if (index > -1) {
-            this.world.level.enemies.splice(index, 1);
-          }
-        }, 1000);
-      });
+      this.handleDeath();
     } else {
       this.playHurtAnimation();
     }
-
-    this.world.statusBarEndboss.setPrecentage(this.energy);
   }
 
-  hit() {
-    this.reduceEnergy();
-    this.handleHurtState();
-    this.checkDeathState();
-  }
-
-  reduceEnergy() {
-    this.energy -= 20;
-    if (this.energy < 0) this.energy = 0;
-  }
-
-  handleHurtState() {
-    if (!this.isDead) {
-      this.playHurtAnimation();
-    }
-  }
-
-  checkDeathState() {
-    if (this.energy === 0 && !this.isDead) {
-      this.die();
-    }
-  }
-
-  die() {
+  /**
+   * Handles the death sequence of the endboss.
+   */
+  handleDeath() {
+    this.energy = 0;
     this.isDead = true;
-    this.playAnimation(this.IMAGES_DEAD);
+    this.playVictorySound();
     this.animateDeath(() => {
-      this.fallDown();
-      this.shrinkAfterDeath();
+      this.removeFromGame();
     });
   }
 
-  shrinkAfterDeath() {
-    setTimeout(() => {
-      this.height = 0;
-      this.width = 0;
-    }, 3000);
+  /**
+   * Plays victory sound and stops background music.
+   */
+  playVictorySound() {
+    if (this.world && this.world.soundManager) {
+      this.world.soundManager.playSound("victory");
+      this.world.soundManager.stopBackgroundMusic();
+    }
   }
 
+  /**
+   * Removes the endboss from the game after a delay.
+   */
+  removeFromGame() {
+    setTimeout(() => {
+      let index = this.world.level.enemies.indexOf(this);
+      if (index > -1) {
+        this.world.level.enemies.splice(index, 1);
+      }
+    }, 1000);
+  }
+
+  /**
+   * Updates the endboss status bar with current energy.
+   */
+  updateStatusBar() {
+    this.world.statusBarEndboss.setPrecentage(this.energy);
+  }
+
+  /**
+   * Plays the hurt animation sequence.
+   */
   playHurtAnimation() {
     let i = 0;
     const interval = setInterval(() => {
@@ -138,15 +215,21 @@ class Endboss extends MovableObject {
       } else {
         clearInterval(interval);
       }
-    }, 140); // Geschwindigkeit: 140ms pro Frame
+    }, 140);
   }
 
+  /**
+   * Handles the attack sequence.
+   */
   playAttackAnimation() {
     if (this.canStartAttack()) {
       this.startAttack();
     }
   }
 
+  /**
+   * Checks if the endboss can start an attack.
+   */
   canStartAttack() {
     return (
       !this.isAttacking &&
@@ -155,11 +238,17 @@ class Endboss extends MovableObject {
     );
   }
 
+  /**
+   * Starts the attack sequence.
+   */
   startAttack() {
     this.isAttacking = true;
     this.playAttackFrames();
   }
 
+  /**
+   * Plays the attack animation frames.
+   */
   playAttackFrames() {
     let i = 0;
     const interval = setInterval(() => {
@@ -175,18 +264,22 @@ class Endboss extends MovableObject {
     }, 100);
   }
 
+  /**
+   * Checks if the attack should be stopped.
+   */
   shouldStopAttack(interval) {
     if (this.world.character.isDead()) {
       clearInterval(interval);
       this.isAttacking = false;
-      this.playAlertAnimation(() => {
-        this.isAttacking = false;
-      });
+      this.playAlertAnimation();
       return true;
     }
     return false;
   }
 
+  /**
+   * Makes the endboss jump towards the character.
+   */
   jumpTowardsCharacter() {
     const char = this.world.character;
     if (this.shouldCancelJump(char)) return;
@@ -195,17 +288,21 @@ class Endboss extends MovableObject {
     this.executeJump(jumpParams);
   }
 
+  /**
+   * Checks if the jump should be cancelled.
+   */
   shouldCancelJump(char) {
     if (char.isDead()) {
       this.isAttacking = false;
-      this.playAlertAnimation(() => {
-        this.isAttacking = false;
-      });
+      this.playAlertAnimation();
       return true;
     }
     return false;
   }
 
+  /**
+   * Calculates jump parameters.
+   */
   calculateJumpParameters(char) {
     return {
       startX: this.x,
@@ -216,6 +313,9 @@ class Endboss extends MovableObject {
     };
   }
 
+  /**
+   * Executes the jump animation.
+   */
   executeJump(params) {
     let step = 0;
     const interval = setInterval(() => {
@@ -233,6 +333,9 @@ class Endboss extends MovableObject {
     }, 40);
   }
 
+  /**
+   * Updates the position during jump.
+   */
   updateJumpPosition(params, step) {
     const t = step / params.steps;
     this.x = params.startX + (params.targetX - params.startX) * t;
@@ -242,6 +345,9 @@ class Endboss extends MovableObject {
       120 * Math.sin(Math.PI * t);
   }
 
+  /**
+   * Finishes the jump sequence.
+   */
   finishJump(interval) {
     clearInterval(interval);
     this.handleCharacterCollision();
@@ -249,6 +355,9 @@ class Endboss extends MovableObject {
     this.fallToGround();
   }
 
+  /**
+   * Handles collision with character.
+   */
   handleCharacterCollision() {
     const char = this.world.character;
     if (!char.isDead() && this.isColliding(char)) {
@@ -259,8 +368,11 @@ class Endboss extends MovableObject {
     }
   }
 
+  /**
+   * Makes the endboss fall to the ground.
+   */
   fallToGround() {
-    const groundY = 55; // Standardposition auf dem Boden
+    const groundY = 55;
     const fallInterval = setInterval(() => {
       if (this.y < groundY) {
         this.y += 5;
@@ -271,6 +383,9 @@ class Endboss extends MovableObject {
     }, 40);
   }
 
+  /**
+   * Animates the death sequence.
+   */
   animateDeath(callback) {
     let i = 0;
     const interval = setInterval(() => {
@@ -279,33 +394,28 @@ class Endboss extends MovableObject {
         i++;
       } else {
         clearInterval(interval);
-        // Warte einen Moment, damit die letzte Animation zu sehen ist
         setTimeout(() => {
           if (callback) callback();
         }, 1000);
       }
-    }, 500); // Langsamere Animation (500ms pro Frame)
+    }, 500);
   }
 
-  fallDown() {
-    let fallInterval = setInterval(() => {
-      if (this.y < 400) {
-        this.y += 5;
-      } else {
-        clearInterval(fallInterval);
-      }
-    }, 40);
-  }
-
+  /**
+   * Plays the alert animation.
+   */
   playAlertAnimation() {
     let i = 0;
-    clearInterval(this.alertInterval); // vorherige Schleife beenden
+    clearInterval(this.alertInterval);
     this.alertInterval = setInterval(() => {
       this.img = this.imageCache[this.IMAGES_ALERT[i]];
-      i = (i + 1) % this.IMAGES_ALERT.length; // Loop zurück zum ersten Bild
+      i = (i + 1) % this.IMAGES_ALERT.length;
     }, 120);
   }
 
+  /**
+   * Main animation loop.
+   */
   animate() {
     setInterval(() => {
       if (this.isDead) return;
@@ -313,10 +423,11 @@ class Endboss extends MovableObject {
     }, 150);
   }
 
+  /**
+   * Updates the endboss behavior.
+   */
   updateBehavior() {
-    const distance = Math.abs(this.x - this.world.character.x);
     const char = this.world.character;
-
     if (this.shouldAttack(char)) {
       this.prepareAttack();
     } else if (this.shouldMove()) {
@@ -324,6 +435,9 @@ class Endboss extends MovableObject {
     }
   }
 
+  /**
+   * Checks if the endboss should attack.
+   */
   shouldAttack(char) {
     return (
       (this.isColliding(char) && !this.isAttacking) ||
@@ -331,21 +445,33 @@ class Endboss extends MovableObject {
     );
   }
 
+  /**
+   * Prepares for attack.
+   */
   prepareAttack() {
     this.otherDirection = false;
     this.directionLeft = true;
     this.playAttackAnimation();
   }
 
+  /**
+   * Checks if the endboss should move.
+   */
   shouldMove() {
     return !this.isAttacking;
   }
 
+  /**
+   * Handles movement.
+   */
   move() {
     this.playAnimation(this.IMAGES_WALKING);
     this.updatePosition();
   }
 
+  /**
+   * Updates the position based on direction.
+   */
   updatePosition() {
     if (!this.directionLeft) {
       this.moveRight();
@@ -354,12 +480,18 @@ class Endboss extends MovableObject {
     }
   }
 
+  /**
+   * Moves the endboss right.
+   */
   moveRight() {
     this.x += this.speedBoost ? 6 : 3;
     this.otherDirection = true;
     if (this.x >= 2700) this.directionLeft = true;
   }
 
+  /**
+   * Moves the endboss left.
+   */
   moveLeft() {
     this.x -= this.speedBoost ? 6 : 3;
     this.otherDirection = false;
