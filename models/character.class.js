@@ -9,7 +9,7 @@ class Character extends MovableObject {
   /** @type {number} Initial y-position of the character */
   y = 80;
   /** @type {number} Movement speed of the character */
-  speed = 10;
+  speed = 5;
   /** @type {number} Number of bottles collected by the character */
   collectedBottles = 0;
   /** @type {boolean} Flag indicating if the character just stomped an enemy */
@@ -94,6 +94,9 @@ class Character extends MovableObject {
   isWalkingSoundPlaying = false;
   /** @type {boolean} Flag indicating if hurt sound has been played */
   hasPlayedHurtSound = false;
+
+  /** @type {object} Hitbox for the character */
+  hitbox = { top: 100, bottom: 0, left: 20, right: 20 };
 
   /**
    * Creates a new Character instance.
@@ -268,7 +271,7 @@ class Character extends MovableObject {
    * Makes the character jump and plays jump sound.
    */
   jump() {
-    this.speedY = 30;
+    this.speedY = 18;
     if (this.world && this.world.soundManager) {
       this.world.soundManager.playSound("jump");
     }

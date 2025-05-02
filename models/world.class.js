@@ -222,95 +222,72 @@ class World {
    * Überprüft die Kollisionen zwischen Objekten.
    */
   checkCollisions() {
-    this.checkStompCollisions();
-    this.checkSideCollisions();
+    if (this.checkStompOnEnemies()) return;
+    if (this.character.justStomped) return;
+    this.checkSideCollisionOnEnemies();
   }
 
-  /**
-   * Überprüft Kollisionen zwischen Charakter und Gegnern.
-   */
-  checkStompCollisions() {
-    const charBottom = this.character.y + this.character.height;
-    const charTop = this.character.y;
-    const charLeft = this.character.x;
-    const charRight = this.character.x + this.character.width;
-
-    this.level.enemies.forEach((enemy) => {
-      if (enemy.isDead || !(enemy instanceof Chicken)) return;
-
-      if (
-        this.isStompingOnEnemy(enemy, charTop, charBottom, charLeft, charRight)
-      ) {
+  checkStompOnEnemies() {
+    for (let enemy of this.level.enemies) {
+      if (this.shouldStompEnemy(enemy)) {
         this.handleStompCollision(enemy);
+        return true;
       }
-    });
+    }
+    return false;
   }
 
-  /**
-   * Überprüft Kollisionen zwischen Charakter und Gegnern.
-   */
-  checkSideCollisions() {
-    const charBottom = this.character.y + this.character.height;
-    const charTop = this.character.y;
-    const charLeft = this.character.x;
-    const charRight = this.character.x + this.character.width;
+  shouldStompEnemy(enemy) {
+    if (enemy.isDead || !(enemy instanceof Chicken)) return false;
+    const { charFeet, enemyMiddle, isHorizontal } =
+      this.getCollisionParams(enemy);
+    return charFeet < enemyMiddle && isHorizontal && this.character.speedY >= 0;
+  }
 
-    this.level.enemies.forEach((enemy) => {
-      if (enemy.isDead || !(enemy instanceof Chicken) || enemy.ignoreCollisions)
-        return;
-
-      if (
-        this.isSideCollidingWithEnemy(
-          enemy,
-          charTop,
-          charBottom,
-          charLeft,
-          charRight
-        )
-      ) {
+  checkSideCollisionOnEnemies() {
+    for (let enemy of this.level.enemies) {
+      if (this.shouldSideCollideWithEnemy(enemy)) {
         this.handleSideCollision();
+        break;
       }
-    });
+    }
   }
 
-  /**
-   * Überprüft Kollisionen zwischen Charakter und Gegnern.
-   */
-  isStompingOnEnemy(enemy, charTop, charBottom, charLeft, charRight) {
-    const enemyTop = enemy.y;
-    const enemyLeft = enemy.x;
-    const enemyRight = enemy.x + enemy.width;
-
-    const isSmallChicken = enemy instanceof ChickenSmall;
-    const heightFactor = isSmallChicken ? 0.7 : 0.6;
-
+  shouldSideCollideWithEnemy(enemy) {
+    if (enemy.isDead || !(enemy instanceof Chicken)) return false;
+    const { charFeet, enemyMiddle, isHorizontal } =
+      this.getCollisionParams(enemy);
     return (
-      this.character.isColliding(enemy) &&
-      this.character.speedY >= 0 &&
-      charBottom <= enemyTop + enemy.height * heightFactor &&
-      charTop < enemyTop + enemy.height * heightFactor &&
-      (!isSmallChicken ||
-        (charRight > enemyLeft + enemy.width * 0.2 &&
-          charLeft < enemyRight - enemy.width * 0.2))
+      charFeet >= enemyMiddle &&
+      isHorizontal &&
+      this.isSideCollidingWithEnemy(
+        enemy,
+        this.character.y,
+        this.character.y + this.character.height,
+        this.character.x,
+        this.character.x + this.character.width
+      )
     );
   }
 
-  /**
-   * Behandelt die Kollision zwischen Charakter und Gegner.
-   * @param {MovableObject} enemy - Der getroffene Gegner
-   */
-  handleStompCollision(enemy) {
-    enemy.hit();
-    this.character.speedY = -15;
-
-    enemy.isDead = true;
-    enemy.ignoreCollisions = true;
-
-    this.character.justStomped = true;
-
-    setTimeout(() => {
-      this.character.justStomped = false;
-    }, 500);
+  getCollisionParams(enemy) {
+    const a = this.character.hitbox || { top: 0, bottom: 0, left: 0, right: 0 };
+    const b = enemy.hitbox || { top: 0, bottom: 0, left: 0, right: 0 };
+    const charFeet = this.character.y + this.character.height - a.bottom;
+    const enemyTop = enemy.y + b.top;
+    const enemyBottom = enemy.y + enemy.height - b.bottom;
+    const enemyMiddle = (enemyTop + enemyBottom) / 2;
+    const cam = this.camera_x || 0;
+    const charLeft = this.character.x + a.left + cam;
+    const charRight = this.character.x + this.character.width - a.right + cam;
+    const enemyLeft = enemy.x + b.left + cam;
+    const enemyRight = enemy.x + enemy.width - b.right + cam;
+    const overlap =
+      Math.min(charRight, enemyRight) - Math.max(charLeft, enemyLeft);
+    const minOverlap =
+      Math.min(charRight - charLeft, enemyRight - enemyLeft) * 0.5;
+    const isHorizontal = overlap > minOverlap;
+    return { charFeet, enemyMiddle, isHorizontal };
   }
 
   /**
@@ -332,6 +309,22 @@ class World {
       charBottom > enemyTop + enemy.height * 0.3 &&
       charTop < enemyBottom - enemy.height * 0.3
     );
+  }
+
+  /**
+   * Behandelt die Kollision zwischen Charakter und Gegner.
+   * @param {MovableObject} enemy - Der getroffene Gegner
+   */
+  handleStompCollision(enemy) {
+    enemy.hit();
+    this.character.speedY = -15;
+    enemy.isDead = true;
+    enemy.ignoreCollisions = true;
+
+    this.character.justStomped = true;
+    setTimeout(() => {
+      this.character.justStomped = false;
+    }, 300);
   }
 
   /**

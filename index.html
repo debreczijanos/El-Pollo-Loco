@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="style.css">
 
     <title>El pollo Loco</title>
+    <script src="./js/swap-iphone.js" defer></script>
+
     <script src="./models/drawable-object.class.js"></script>
     <script src="./models/movable-object.class.js"></script>
 
@@ -34,7 +36,7 @@
 
     <script src="./js/sound-manager.js"></script>
     <script src="./js/game.js"></script>
-    <script src="./js/swap-iphone.js"></script>
+
     <script src="./js/overlay.js"></script>
 </head>
 
@@ -136,13 +138,19 @@
     </div>
 
     <script>
-        let soundOn = true;
-
-        document.getElementById("soundToggleBtn").addEventListener("click", function () {
-            soundOn = !soundOn;
-            this.textContent = soundOn ? "🔊" : "🔇";
-
-            if (typeof game !== "undefined" && game.soundManager) {
+        let soundOn = localStorage.getItem('soundOn') !== '0';
+        document.addEventListener('DOMContentLoaded', function () {
+            const btn = document.getElementById("soundToggleBtn");
+            btn.textContent = soundOn ? "🔊" : "🔇";
+            btn.addEventListener("click", function () {
+                soundOn = !soundOn;
+                this.textContent = soundOn ? "🔊" : "🔇";
+                localStorage.setItem('soundOn', soundOn ? '1' : '0');
+                if (typeof game !== "undefined" && game.soundManager) {
+                    game.soundManager.toggleMute();
+                }
+            });
+            if (!soundOn && typeof game !== "undefined" && game.soundManager) {
                 game.soundManager.toggleMute();
             }
         });

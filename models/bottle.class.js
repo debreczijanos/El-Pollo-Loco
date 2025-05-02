@@ -39,5 +39,7 @@ class Bottle extends DrawableObject {
         this.IMAGES_BOTTLE_ON_GROUND[Math.floor(Math.random() * 2)]
       );
     }
+
+    this.hitbox = { top: 10, bottom: 10, left: 10, right: 10 };
   }
 }

@@ -62,7 +62,7 @@ class ThrowableObject extends MovableObject {
    * Setzt die vertikale Geschwindigkeit und aktiviert die Schwerkraft.
    */
   initializeThrow() {
-    this.speedY = 30;
+    this.speedY = 18;
     this.applyGravity();
   }
 

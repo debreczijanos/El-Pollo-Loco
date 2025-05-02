@@ -26,7 +26,7 @@ class MovableObject extends DrawableObject {
    * Die Beschleunigung des Objekts (für Schwerkraft).
    * @type {number}
    */
-  acceleration = 2.5;
+  acceleration = 1.2;
 
   /**
    * Die Energie/HP des Objekts.
@@ -71,18 +71,20 @@ class MovableObject extends DrawableObject {
   }
 
   /**
-   * Prüft, ob dieses Objekt mit einem anderen Objekt kollidiert.
+   * Prüft, ob dieses Objekt mit einem anderen Objekt kollidiert, unter Berücksichtigung der individuellen Hitboxen.
    * @param {DrawableObject} obj - Das zu prüfende Objekt
    * @returns {boolean} - True, wenn eine Kollision vorliegt
    */
   isColliding(obj) {
-    const collides =
-      this.x + this.width > obj.x &&
-      this.x < obj.x + obj.width &&
-      this.y + this.height > obj.y &&
-      this.y < obj.y + obj.height;
+    const a = this.hitbox || { top: 0, bottom: 0, left: 0, right: 0 };
+    const b = obj.hitbox || { top: 0, bottom: 0, left: 0, right: 0 };
 
-    return collides;
+    return (
+      this.x + a.left < obj.x + obj.width - b.right &&
+      this.x + this.width - a.right > obj.x + b.left &&
+      this.y + a.top < obj.y + obj.height - b.bottom &&
+      this.y + this.height - a.bottom > obj.y + b.top
+    );
   }
 
   /**
@@ -90,7 +92,7 @@ class MovableObject extends DrawableObject {
    * Reduziert die Energie und aktualisiert den letzten Treffer-Zeitstempel.
    */
   hit() {
-    this.energy -= 5;
+    this.energy -= 20;
     if (this.energy < 0) {
       this.energy = 0;
     } else {

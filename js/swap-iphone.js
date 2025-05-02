@@ -3,7 +3,7 @@
  * @returns {boolean} - True if the device is in portrait mode, false otherwise.
  */
 function isPortraitMode() {
-  return window.innerWidth < 667;
+  return window.innerHeight > window.innerWidth;
 }
 
 /**
@@ -33,9 +33,9 @@ function handleLandscapeMode(warning, gameScreenSwap) {
 function setupMobileControls() {
   const descriptionMobile = document.querySelector(".description-mobile");
   const description = document.querySelectorAll(".description");
-  const isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+  const isMobileOrTablet = isMobileDevice() || isTablet();
 
-  if (isMobileDevice) {
+  if (isMobileOrTablet) {
     descriptionMobile.style.display = "flex";
     description.forEach((el) => {
       el.style.display = "none";
@@ -55,7 +55,7 @@ function checkOrientation() {
   const warning = document.getElementById("swapYourPhone");
   const gameScreenSwap = document.getElementById("gameScreen");
 
-  if (isPortraitMode()) {
+  if (isMobileDevice() && isPortraitMode()) {
     handlePortraitMode(warning, gameScreenSwap);
   } else {
     handleLandscapeMode(warning, gameScreenSwap);
@@ -68,3 +68,32 @@ function checkOrientation() {
 window.addEventListener("load", checkOrientation);
 window.addEventListener("resize", checkOrientation);
 window.addEventListener("orientationchange", checkOrientation);
+
+/**
+ * Checks if the current device is a mobile device (phone or small screen).
+ * @returns {boolean} True if the device is a mobile device, false otherwise.
+ */
+function isMobileDevice() {
+  return (
+    /Mobi|Android|iPhone/i.test(navigator.userAgent) || window.innerWidth < 700
+  );
+}
+
+/**
+ * Checks if the current device is a tablet (based on user agent, touch capability, and screen width).
+ * @returns {boolean} True if the device is detected as a tablet, false otherwise.
+ */
+function isTablet() {
+  const ua = navigator.userAgent;
+  const isIPad = /iPad/.test(ua);
+  const isAndroidTablet = /Android/.test(ua) && !/Mobile/.test(ua);
+  const isGenericTablet = /Tablet/.test(ua);
+  const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 1;
+  const width = window.innerWidth;
+  return (
+    isIPad ||
+    isAndroidTablet ||
+    isGenericTablet ||
+    (hasTouch && width >= 700 && width <= 1366)
+  );
+}

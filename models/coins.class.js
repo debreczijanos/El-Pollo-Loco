@@ -26,6 +26,8 @@ class Coin extends DrawableObject {
     this.growing = true;
 
     this.animate();
+
+    this.hitbox = { top: 20, bottom: 20, left: 20, right: 20 };
   }
 
   /**
