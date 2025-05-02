@@ -1,11 +1,11 @@
 /**
- * Repräsentiert die Hauptstatusleiste im Spiel.
- * Zeigt den Gesundheitszustand des Charakters an.
+ * Represents the main status bar in the game.
+ * Shows the health status of the character.
  * @extends DrawableObject
  */
 class StatusBar extends DrawableObject {
   /**
-   * Array von Bildpfaden für die verschiedenen Gesundheitszustände.
+   * Array of image paths for the various health states.
    * @type {string[]}
    */
   IMAGES = [
@@ -18,14 +18,14 @@ class StatusBar extends DrawableObject {
   ];
 
   /**
-   * Der aktuelle Prozentsatz der Gesundheitsleiste.
+   * The current percentage of the health bar.
    * @type {number}
    */
   percentage = 100;
 
   /**
-   * Erstellt eine neue Hauptstatusleiste.
-   * Initialisiert die Position, Größe und den Startwert.
+   * Creates a new main status bar.
+   * Initializes the position, size, and start value.
    */
   constructor() {
     super();
@@ -38,8 +38,8 @@ class StatusBar extends DrawableObject {
   }
 
   /**
-   * Setzt den Prozentsatz der Gesundheitsleiste und aktualisiert das angezeigte Bild.
-   * @param {number} percentage - Der neue Prozentsatz (0-100)
+   * Sets the percentage of the health bar and updates the displayed image.
+   * @param {number} percentage - The new percentage (0-100)
    */
   setPrecentage(percentage) {
     this.percentage = percentage;
@@ -48,8 +48,8 @@ class StatusBar extends DrawableObject {
   }
 
   /**
-   * Bestimmt den Index des anzuzeigenden Bildes basierend auf dem aktuellen Prozentsatz.
-   * @returns {number} - Der Index des anzuzeigenden Bildes im IMAGES-Array
+   * Determines the index of the image to display based on the current percentage.
+   * @returns {number} - The index of the image to display in the IMAGES array
    */
   resolveImageIndex() {
     if (this.percentage == 100) {

@@ -1,11 +1,11 @@
 /**
- * Repräsentiert die Statusleiste für die Münzenanzahl im Spiel.
- * Zeigt den Füllstand der gesammelten Münzen des Charakters an.
+ * Represents the status bar for the coin count in the game.
+ * Shows the fill level of the character's collected coins.
  * @extends DrawableObject
  */
 class StatusBarCoins extends DrawableObject {
   /**
-   * Array von Bildpfaden für die verschiedenen Füllstände der Münzenleiste.
+   * Array of image paths for the various fill levels of the coin bar.
    * @type {string[]}
    */
   IMAGES_COINS = [
@@ -18,14 +18,14 @@ class StatusBarCoins extends DrawableObject {
   ];
 
   /**
-   * Der aktuelle Prozentsatz der Münzenleiste.
+   * The current percentage of the coin bar.
    * @type {number}
    */
   percentage = 0;
 
   /**
-   * Erstellt eine neue Münzenstatusleiste.
-   * Initialisiert die Position, Größe und den Startwert.
+   * Creates a new coin status bar.
+   * Initializes the position, size, and start value.
    */
   constructor() {
     super();
@@ -38,8 +38,8 @@ class StatusBarCoins extends DrawableObject {
   }
 
   /**
-   * Setzt den Prozentsatz der Münzenleiste und aktualisiert das angezeigte Bild.
-   * @param {number} percentage - Der neue Prozentsatz (0-100)
+   * Sets the percentage of the coin bar and updates the displayed image.
+   * @param {number} percentage - The new percentage (0-100)
    */
   setPrecentage(percentage) {
     this.percentage = percentage;
@@ -48,8 +48,8 @@ class StatusBarCoins extends DrawableObject {
   }
 
   /**
-   * Bestimmt den Index des anzuzeigenden Bildes basierend auf dem aktuellen Prozentsatz.
-   * @returns {number} - Der Index des anzuzeigenden Bildes im IMAGES_COINS-Array
+   * Determines the index of the image to display based on the current percentage.
+   * @returns {number} - The index of the image to display in the IMAGES_COINS array
    */
   resolveImageIndex() {
     if (this.percentage === 100 || this.percentage >= 100) {

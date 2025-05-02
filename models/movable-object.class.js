@@ -1,48 +1,48 @@
 /**
- * Repräsentiert ein bewegliches Objekt im Spiel.
- * Erweitert die Funktionalität von DrawableObject um Bewegungs- und Physik-Eigenschaften.
+ * Represents a movable object in the game.
+ * Extends the functionality of DrawableObject with movement and physics properties.
  * @extends DrawableObject
  */
 class MovableObject extends DrawableObject {
   /**
-   * Die Bewegungsgeschwindigkeit des Objekts.
+   * The movement speed of the object.
    * @type {number}
    */
   speed = 0.15;
 
   /**
-   * Gibt an, ob das Objekt in die andere Richtung schaut.
+   * Indicates whether the object is facing the other direction.
    * @type {boolean}
    */
   otherDirection = false;
 
   /**
-   * Die vertikale Geschwindigkeit des Objekts (für Sprünge und Fallen).
+   * The vertical speed of the object (for jumping and falling).
    * @type {number}
    */
   speedY = 0;
 
   /**
-   * Die Beschleunigung des Objekts (für Schwerkraft).
+   * The acceleration of the object (for gravity).
    * @type {number}
    */
   acceleration = 1.2;
 
   /**
-   * Die Energie/HP des Objekts.
+   * The energy/HP of the object.
    * @type {number}
    */
   energy = 100;
 
   /**
-   * Zeitstempel des letzten Treffers.
+   * Timestamp of the last hit.
    * @type {number}
    */
   lastHit = 0;
 
   /**
-   * Wendet die Schwerkraft auf das Objekt an.
-   * Aktualisiert die vertikale Position basierend auf der Geschwindigkeit.
+   * Applies gravity to the object.
+   * Updates the vertical position based on the speed.
    */
   applyGravity() {
     setInterval(() => {
@@ -59,8 +59,8 @@ class MovableObject extends DrawableObject {
   }
 
   /**
-   * Prüft, ob sich das Objekt über dem Boden befindet.
-   * @returns {boolean} - True, wenn das Objekt über dem Boden ist
+   * Checks if the object is above the ground.
+   * @returns {boolean} - True if the object is above the ground
    */
   isAboveGround() {
     if (this instanceof ThrowableObject) {
@@ -71,9 +71,9 @@ class MovableObject extends DrawableObject {
   }
 
   /**
-   * Prüft, ob dieses Objekt mit einem anderen Objekt kollidiert, unter Berücksichtigung der individuellen Hitboxen.
-   * @param {DrawableObject} obj - Das zu prüfende Objekt
-   * @returns {boolean} - True, wenn eine Kollision vorliegt
+   * Checks if this object collides with another object, taking into account individual hitboxes.
+   * @param {DrawableObject} obj - The object to check
+   * @returns {boolean} - True if a collision occurs
    */
   isColliding(obj) {
     const a = this.hitbox || { top: 0, bottom: 0, left: 0, right: 0 };
@@ -88,8 +88,8 @@ class MovableObject extends DrawableObject {
   }
 
   /**
-   * Verarbeitet einen Treffer auf das Objekt.
-   * Reduziert die Energie und aktualisiert den letzten Treffer-Zeitstempel.
+   * Processes a hit on the object.
+   * Reduces energy and updates the last hit timestamp.
    */
   hit() {
     this.energy -= 20;
@@ -101,16 +101,16 @@ class MovableObject extends DrawableObject {
   }
 
   /**
-   * Prüft, ob das Objekt tot ist.
-   * @returns {boolean} - True, wenn die Energie 0 ist
+   * Checks if the object is dead.
+   * @returns {boolean} - True if the energy is 0
    */
   isDead() {
     return this.energy == 0;
   }
 
   /**
-   * Prüft, ob das Objekt verletzt ist.
-   * @returns {boolean} - True, wenn das Objekt in den letzten Sekunde getroffen wurde
+   * Checks if the object is hurt.
+   * @returns {boolean} - True if the object was hit in the last second
    */
   isHurt() {
     let timepassed = new Date().getTime() - this.lastHit;
@@ -119,12 +119,12 @@ class MovableObject extends DrawableObject {
   }
 
   /**
-   * Spielt eine Animation ab.
-   * @param {string[]} images - Array von Bildpfaden für die Animation
+   * Plays an animation.
+   * @param {string[]} images - Array of image paths for the animation
    */
   playAnimation(images) {
     if (!images || images.length === 0) {
-      console.error("Fehler: Bild-Array ist undefined oder leer!", images);
+      console.error("Error: Image array is undefined or empty!", images);
       return;
     }
 
@@ -134,28 +134,28 @@ class MovableObject extends DrawableObject {
     if (this.imageCache[path]) {
       this.img = this.imageCache[path];
     } else {
-      console.warn("Bild nicht gefunden:", path);
+      console.warn("Image not found:", path);
     }
 
     this.currentImage++;
   }
 
   /**
-   * Bewegt das Objekt nach rechts.
+   * Moves the object to the right.
    */
   moveRight() {
     this.x += this.speed;
   }
 
   /**
-   * Bewegt das Objekt nach links.
+   * Moves the object to the left.
    */
   moveLeft() {
     this.x -= this.speed;
   }
 
   /**
-   * Lässt das Objekt springen.
+   * Makes the object jump.
    */
   jump() {
     this.speedY = 30;

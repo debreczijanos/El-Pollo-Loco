@@ -1,85 +1,85 @@
 /**
- * Repräsentiert die Spielwelt und verwaltet alle Spielobjekte.
- * Koordiniert die Interaktionen zwischen Charakter, Gegnern und Objekten.
+ * Represents the game world and manages all game objects.
+ * Coordinates the interactions between character, enemies, and objects.
  */
 class World {
   /**
-   * Der Hauptcharakter des Spiels.
+   * The main character of the game.
    * @type {Character}
    */
   character;
 
   /**
-   * Das aktuelle Level mit allen Objekten.
+   * The current level with all objects.
    * @type {Level}
    */
   level;
 
   /**
-   * Das Canvas-Element für die Spielgrafik.
+   * The canvas element for game graphics.
    * @type {HTMLCanvasElement}
    */
   canvas;
 
   /**
-   * Der 2D-Kontext des Canvas für das Zeichnen.
+   * The 2D context of the canvas for drawing.
    * @type {CanvasRenderingContext2D}
    */
   ctx;
 
   /**
-   * Die Tastatureingaben des Spielers.
+   * The player's keyboard input.
    * @type {Keyboard}
    */
   keyboard;
 
   /**
-   * Die X-Position der Kamera.
+   * The X position of the camera.
    * @type {number}
    */
   camera_x = 0;
 
   /**
-   * Die Statusleiste für die Gesundheit.
+   * The status bar for health.
    * @type {StatusBar}
    */
   statusBar;
 
   /**
-   * Die Statusleiste für die Münzen.
+   * The status bar for coins.
    * @type {StatusBarCoins}
    */
   statusBarCoins;
 
   /**
-   * Die Statusleiste für die Flaschen.
+   * The status bar for bottles.
    * @type {StatusBarBottle}
    */
   statusBarBottle;
 
   /**
-   * Die Statusleiste für den Endboss.
+   * The status bar for the endboss.
    * @type {StatusBarEndboss}
    */
   statusBarEndboss;
 
   /**
-   * Array von werfbaren Objekten (Flaschen).
+   * Array of throwable objects (bottles).
    * @type {ThrowableObject[]}
    */
   throwableObjects = [];
 
   /**
-   * Referenz auf die Game-Klasse.
+   * Reference to the Game class.
    * @type {Game}
    */
   game;
 
   /**
-   * Erstellt eine neue Spielwelt.
-   * @param {HTMLCanvasElement} canvas - Das Canvas-Element für die Grafik
-   * @param {Keyboard} keyboard - Die Tastatureingaben
-   * @param {Game} game - Die Hauptspielklasse
+   * Creates a new game world.
+   * @param {HTMLCanvasElement} canvas - The canvas element for graphics
+   * @param {Keyboard} keyboard - The keyboard input
+   * @param {Game} game - The main game class
    */
   constructor(canvas, keyboard, game) {
     this.ctx = canvas.getContext("2d");
@@ -107,7 +107,7 @@ class World {
   }
 
   /**
-   * Setzt die Welt-Referenz für alle beweglichen Objekte.
+   * Sets the world reference for all movable objects.
    */
   setWorld() {
     this.character.world = this;
@@ -116,8 +116,8 @@ class World {
   }
 
   /**
-   * Startet die Hauptspielschleife.
-   * Überprüft regelmäßig Kollisionen und Spielzustände.
+   * Starts the main game loop.
+   * Regularly checks for collisions and game states.
    */
   run() {
     this.gameInterval = setInterval(() => {
@@ -135,7 +135,7 @@ class World {
   }
 
   /**
-   * Zeichnet alle Objekte der Spielwelt.
+   * Draws all objects in the game world.
    */
   draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -172,8 +172,8 @@ class World {
   }
 
   /**
-   * Fügt ein einzelnes Objekt zur Zeichenfläche hinzu.
-   * @param {DrawableObject} mo - Das zu zeichnende Objekt
+   * Adds a single object to the canvas.
+   * @param {DrawableObject} mo - The object to draw
    */
   addToMap(mo) {
     if (mo.otherDirection) {
@@ -189,8 +189,8 @@ class World {
   }
 
   /**
-   * Fügt mehrere Objekte zur Zeichenfläche hinzu.
-   * @param {DrawableObject[]} objects - Array von zu zeichnenden Objekten
+   * Adds multiple objects to the canvas.
+   * @param {DrawableObject[]} objects - Array of objects to draw
    */
   addObjectsToMap(objects) {
     objects.forEach((o) => {
@@ -199,8 +199,8 @@ class World {
   }
 
   /**
-   * Spiegelt ein Bild horizontal.
-   * @param {DrawableObject} mo - Das zu spiegelnde Objekt
+   * Flips an image horizontally.
+   * @param {DrawableObject} mo - The object to flip
    */
   flipImage(mo) {
     this.ctx.save();
@@ -210,8 +210,8 @@ class World {
   }
 
   /**
-   * Stellt die ursprüngliche Bildausrichtung wieder her.
-   * @param {DrawableObject} mo - Das Objekt
+   * Resets the original image orientation.
+   * @param {DrawableObject} mo - The object
    */
   flipImageBack(mo) {
     mo.x = mo.x * -1;
@@ -219,7 +219,7 @@ class World {
   }
 
   /**
-   * Überprüft die Kollisionen zwischen Objekten.
+   * Checks for collisions between objects.
    */
   checkCollisions() {
     if (this.checkStompOnEnemies()) return;
@@ -291,7 +291,7 @@ class World {
   }
 
   /**
-   * Überprüft Kollisionen zwischen Charakter und Gegnern.
+   * Checks for collisions between character and enemies.
    */
   isSideCollidingWithEnemy(enemy, charTop, charBottom, charLeft, charRight) {
     const enemyTop = enemy.y;
@@ -312,8 +312,8 @@ class World {
   }
 
   /**
-   * Behandelt die Kollision zwischen Charakter und Gegner.
-   * @param {MovableObject} enemy - Der getroffene Gegner
+   * Handles the collision between character and enemy.
+   * @param {MovableObject} enemy - The hit enemy
    */
   handleStompCollision(enemy) {
     enemy.hit();
@@ -328,7 +328,7 @@ class World {
   }
 
   /**
-   * Behandelt den Treffer des Charakters.
+   * Handles the character's hit.
    */
   handleSideCollision() {
     if (!this.character.isHurt()) {
@@ -338,7 +338,7 @@ class World {
   }
 
   /**
-   * Überprüft und aktualisiert den Zustand der werfbaren Objekte.
+   * Checks and updates the state of throwable objects.
    */
   checkThrowableObjects() {
     if (this.keyboard.D && this.character.collectedBottles > 0) {
@@ -358,7 +358,7 @@ class World {
   }
 
   /**
-   * Überprüft das Einsammeln von Münzen.
+   * Checks for coin collection.
    */
   checkCoinCollection() {
     if (!this.level.coins?.length) return;
@@ -380,7 +380,7 @@ class World {
   }
 
   /**
-   * Überprüft das Einsammeln von Flaschen.
+   * Checks for bottle collection.
    */
   checkBottleCollection() {
     if (!this.level.bottles?.length) return;

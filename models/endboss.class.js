@@ -1,59 +1,59 @@
 /**
- * Repräsentiert den Endboss des Spiels.
- * Der Endboss ist ein spezieller Gegner mit einzigartigen Fähigkeiten wie Angriffen und Sprüngen.
+ * Represents the endboss of the game.
+ * The endboss is a special enemy with unique abilities such as attacks and jumps.
  * @extends MovableObject
  */
 class Endboss extends MovableObject {
   /**
-   * Gibt an, ob der Endboss tot ist.
+   * Indicates whether the endboss is dead.
    * @type {boolean}
    */
   isDead = false;
 
   /**
-   * Gibt an, ob der Endboss gerade angreift.
+   * Indicates whether the endboss is currently attacking.
    * @type {boolean}
    */
   isAttacking = false;
 
   /**
-   * Die Höhe des Endbosses in Pixeln.
+   * The height of the endboss in pixels.
    * @type {number}
    */
   height = 400;
 
   /**
-   * Die Breite des Endbosses in Pixeln.
+   * The width of the endboss in pixels.
    * @type {number}
    */
   width = 250;
 
   /**
-   * Die Y-Position des Endbosses.
+   * The Y position of the endboss.
    * @type {number}
    */
   y = 55;
 
   /**
-   * Gibt an, ob der Endboss nach links schaut.
+   * Indicates whether the endboss is facing left.
    * @type {boolean}
    */
   directionLeft = true;
 
   /**
-   * Gibt an, ob der Endboss in die andere Richtung schaut.
+   * Indicates whether the endboss is facing the other direction.
    * @type {boolean}
    */
   otherDirection = true;
 
   /**
-   * Die Energie des Endbosses.
+   * The energy of the endboss.
    * @type {number}
    */
   energy = 100;
 
   /**
-   * Array von Bildpfaden für die Geh-Animation.
+   * Array of image paths for the walking animation.
    * @type {string[]}
    */
   IMAGES_WALKING = [
@@ -64,7 +64,7 @@ class Endboss extends MovableObject {
   ];
 
   /**
-   * Array von Bildpfaden für die Alarm-Animation.
+   * Array of image paths for the alert animation.
    * @type {string[]}
    */
   IMAGES_ALERT = [
@@ -79,7 +79,7 @@ class Endboss extends MovableObject {
   ];
 
   /**
-   * Array von Bildpfaden für die Angriffs-Animation.
+   * Array of image paths for the attack animation.
    * @type {string[]}
    */
   IMAGES_ATTACK = [
@@ -94,7 +94,7 @@ class Endboss extends MovableObject {
   ];
 
   /**
-   * Array von Bildpfaden für die Todes-Animation.
+   * Array of image paths for the death animation.
    * @type {string[]}
    */
   IMAGES_DEAD = [
@@ -104,7 +104,7 @@ class Endboss extends MovableObject {
   ];
 
   /**
-   * Array von Bildpfaden für die Verletzungs-Animation.
+   * Array of image paths for the hurt animation.
    * @type {string[]}
    */
   IMAGES_HURT = [
@@ -114,9 +114,9 @@ class Endboss extends MovableObject {
   ];
 
   /**
-   * Erstellt eine neue Instanz des Endbosses.
-   * @param {StatusBar} statusBar - Die Statusleiste für den Endboss
-   * @param {World} world - Die Spielwelt
+   * Creates a new instance of the endboss.
+   * @param {StatusBar} statusBar - The status bar for the endboss
+   * @param {World} world - The game world
    */
   constructor(statusBar, world) {
     super().loadImage(this.IMAGES_WALKING[0]);

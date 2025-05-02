@@ -1,12 +1,12 @@
 /**
- * Repräsentiert die Statusleiste für den Endboss im Spiel.
- * Zeigt den Gesundheitszustand des Endbosses an.
+ * Represents the status bar for the endboss in the game.
+ * Shows the health status of the endboss.
  * @extends DrawableObject
  */
 class StatusBarEndboss extends DrawableObject {
   /**
-   * Array von Bildpfaden für die verschiedenen Gesundheitszustände des Endbosses.
-   * Die Farben ändern sich je nach Gesundheitszustand (orange -> blau -> grün).
+   * Array of image paths for the various health states of the endboss.
+   * The colors change depending on the health state (orange -> blue -> green).
    * @type {string[]}
    */
   IMAGES_ENDBOSS = [
@@ -19,15 +19,15 @@ class StatusBarEndboss extends DrawableObject {
   ];
 
   /**
-   * Der aktuelle Prozentsatz der Gesundheitsleiste.
+   * The current percentage of the health bar.
    * @type {number}
    */
   percentage = 100;
 
   /**
-   * Erstellt eine neue Endboss-Statusleiste.
-   * Initialisiert die Position, Größe und den Startwert.
-   * @param {StatusBar} statusBar - Referenz zur Hauptstatusleiste
+   * Creates a new endboss status bar.
+   * Initializes the position, size, and start value.
+   * @param {StatusBar} statusBar - Reference to the main status bar
    */
   constructor(statusBar) {
     super();
@@ -41,8 +41,8 @@ class StatusBarEndboss extends DrawableObject {
   }
 
   /**
-   * Setzt den Prozentsatz der Gesundheitsleiste und aktualisiert das angezeigte Bild.
-   * @param {number} percentage - Der neue Prozentsatz (0-100)
+   * Sets the percentage of the health bar and updates the displayed image.
+   * @param {number} percentage - The new percentage (0-100)
    */
   setPrecentage(percentage) {
     this.percentage = percentage;
@@ -51,8 +51,8 @@ class StatusBarEndboss extends DrawableObject {
   }
 
   /**
-   * Bestimmt den Index des anzuzeigenden Bildes basierend auf dem aktuellen Prozentsatz.
-   * @returns {number} - Der Index des anzuzeigenden Bildes im IMAGES_ENDBOSS-Array
+   * Determines the index of the image to display based on the current percentage.
+   * @returns {number} - The index of the image to display in the IMAGES_ENDBOSS array
    */
   resolveImageIndex() {
     if (this.percentage == 100) {

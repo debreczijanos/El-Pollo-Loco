@@ -1,71 +1,71 @@
 /**
- * Repräsentiert die Tastatursteuerung des Spiels.
- * Verwaltet den Zustand der Tasten und ermöglicht die Abfrage von Tastendrücken.
+ * Represents the keyboard controls of the game.
+ * Manages the state of the keys and allows querying key presses.
  */
 class Keyboard {
   /**
-   * Gibt an, ob die linke Pfeiltaste gedrückt ist.
+   * Indicates whether the left arrow key is pressed.
    * @type {boolean}
    */
   LEFT = false;
 
   /**
-   * Gibt an, ob die obere Pfeiltaste gedrückt ist.
+   * Indicates whether the up arrow key is pressed.
    * @type {boolean}
    */
   UP = false;
 
   /**
-   * Gibt an, ob die rechte Pfeiltaste gedrückt ist.
+   * Indicates whether the right arrow key is pressed.
    * @type {boolean}
    */
   RIGHT = false;
 
   /**
-   * Gibt an, ob die untere Pfeiltaste gedrückt ist.
+   * Indicates whether the down arrow key is pressed.
    * @type {boolean}
    */
   DOWN = false;
 
   /**
-   * Gibt an, ob die Leertaste gedrückt ist.
+   * Indicates whether the space bar is pressed.
    * @type {boolean}
    */
   SPACE = false;
 
   /**
-   * Gibt an, ob die D-Taste gedrückt ist.
+   * Indicates whether the D key is pressed.
    * @type {boolean}
    */
   D = false;
 
   /**
-   * Erstellt eine neue Keyboard-Instanz.
-   * Initialisiert die Liste der gedrückten Tasten.
+   * Creates a new Keyboard instance.
+   * Initializes the list of pressed keys.
    */
   constructor() {
     this.keys = [];
   }
 
   /**
-   * Fügt eine Taste zur Liste der gedrückten Tasten hinzu.
-   * @param {string} key - Die hinzuzufügende Taste
+   * Adds a key to the list of pressed keys.
+   * @param {string} key - The key to add
    */
   addKey(key) {
     this.keys.push(key);
   }
 
   /**
-   * Entfernt eine Taste aus der Liste der gedrückten Tasten.
-   * @param {string} key - Die zu entfernende Taste
+   * Removes a key from the list of pressed keys.
+   * @param {string} key - The key to remove
    */
   removeKey(key) {
     this.keys = this.keys.filter((k) => k !== key);
   }
 
   /**
-   * Gibt die Liste aller gedrückten Tasten zurück.
-   * @returns {string[]} Array der gedrückten Tasten
+   * Returns the list of all pressed keys.
+   * @returns {string[]} Array of pressed keys
    */
   getKeys() {
     return this.keys;

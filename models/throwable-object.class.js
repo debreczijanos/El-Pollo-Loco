@@ -1,11 +1,11 @@
 /**
- * Repräsentiert ein werfbares Objekt (Flasche) im Spiel.
- * Erweitert die Funktionalität von MovableObject um Wurf- und Kollisionsverhalten.
+ * Represents a throwable object (bottle) in the game.
+ * Extends the functionality of MovableObject with throwing and collision behavior.
  * @extends MovableObject
  */
 class ThrowableObject extends MovableObject {
   /**
-   * Array von Bildpfaden für die Rotationsanimation der Flasche.
+   * Array of image paths for the bottle's rotation animation.
    * @type {string[]}
    */
   IMAGES_BOTTLE_ROTATION = [
@@ -16,7 +16,7 @@ class ThrowableObject extends MovableObject {
   ];
 
   /**
-   * Array von Bildpfaden für die Splash-Animation beim Aufprall.
+   * Array of image paths for the splash animation on impact.
    * @type {string[]}
    */
   IMAGES_BOTTLE_SPLASH = [
@@ -29,10 +29,10 @@ class ThrowableObject extends MovableObject {
   ];
 
   /**
-   * Erstellt ein neues werfbares Objekt.
-   * @param {number} x - Die X-Position des Objekts
-   * @param {number} y - Die Y-Position des Objekts
-   * @param {number} direction - Die Wurfrichtung (-1 für links, 1 für rechts)
+   * Creates a new throwable object.
+   * @param {number} x - The X position of the object
+   * @param {number} y - The Y position of the object
+   * @param {number} direction - The throw direction (-1 for left, 1 for right)
    */
   constructor(x, y, direction) {
     super().loadImage(this.IMAGES_BOTTLE_ROTATION[0]);
@@ -48,8 +48,8 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Initialisiert den Wurf der Flasche.
-   * Setzt die vertikale Geschwindigkeit und aktiviert die Schwerkraft.
+   * Initializes the throw of the bottle.
+   * Sets the vertical speed and activates gravity.
    */
   trow() {
     this.initializeThrow();
@@ -58,8 +58,8 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Initialisiert die Wurfparameter.
-   * Setzt die vertikale Geschwindigkeit und aktiviert die Schwerkraft.
+   * Initializes the throw parameters.
+   * Sets the vertical speed and activates gravity.
    */
   initializeThrow() {
     this.speedY = 18;
@@ -67,8 +67,8 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Richtet das Bewegungsintervall für die Flasche ein.
-   * Überprüft regelmäßig, ob die Bewegung gestoppt werden soll.
+   * Sets up the movement interval for the bottle.
+   * Regularly checks whether the movement should be stopped.
    */
   setupMovementInterval() {
     this.moveInterval = setInterval(() => {
@@ -81,16 +81,16 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Prüft, ob die Bewegung der Flasche gestoppt werden soll.
-   * @returns {boolean} - True, wenn die Flasche auf einen Gegner trifft oder den Boden erreicht
+   * Checks whether the movement of the bottle should be stopped.
+   * @returns {boolean} - True if the bottle hits an enemy or reaches the ground
    */
   shouldStopMovement() {
     return this.checkCollisionWithEnemies() || this.y >= 360;
   }
 
   /**
-   * Behandelt das Stoppen der Bewegung.
-   * Zeigt die Splash-Animation an der aktuellen Position.
+   * Handles stopping the movement.
+   * Shows the splash animation at the current position.
    */
   handleMovementStop() {
     clearInterval(this.moveInterval);
@@ -100,15 +100,15 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Bewegt die Flasche in die angegebene Richtung.
+   * Moves the bottle in the specified direction.
    */
   moveBottle() {
     this.x += 13 * this.direction;
   }
 
   /**
-   * Startet die Animation der Flasche.
-   * Aktualisiert regelmäßig die Animation basierend auf dem Zustand.
+   * Starts the animation of the bottle.
+   * Regularly updates the animation based on the state.
    */
   animate() {
     this.animationInterval = setInterval(() => {
@@ -121,15 +121,15 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Stoppt die Animation der Flasche.
+   * Stops the animation of the bottle.
    */
   stopAnimation() {
     clearInterval(this.animationInterval);
   }
 
   /**
-   * Aktualisiert die Animation der Flasche basierend auf ihrer Position.
-   * Spielt entweder die Rotations- oder Splash-Animation ab.
+   * Updates the animation of the bottle based on its position.
+   * Plays either the rotation or splash animation.
    */
   updateAnimation() {
     if (this.y < 360) {
@@ -140,8 +140,8 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Behandelt die Splash-Animation beim Aufprall.
-   * Spielt den Splash-Sound ab und entfernt die Flasche nach einer Verzögerung.
+   * Handles the splash animation on impact.
+   * Plays the splash sound and removes the bottle after a delay.
    */
   handleSplashAnimation() {
     this.playAnimation(this.IMAGES_BOTTLE_SPLASH);
@@ -155,7 +155,7 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Entfernt die Flasche nach einer Verzögerung aus dem Spiel.
+   * Removes the bottle from the game after a delay.
    */
   removeBottleAfterDelay() {
     setTimeout(() => {
@@ -164,7 +164,7 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Entfernt die Flasche aus dem Array der werfbaren Objekte.
+   * Removes the bottle from the array of throwable objects.
    */
   removeBottle() {
     let index = world.throwableObjects.indexOf(this);
@@ -174,8 +174,8 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Prüft auf Kollisionen mit Gegnern.
-   * @returns {boolean} - True, wenn eine Kollision mit einem Gegner stattgefunden hat
+   * Checks for collisions with enemies.
+   * @returns {boolean} - True if a collision with an enemy occurred
    */
   checkCollisionWithEnemies() {
     if (this.hasSplashed) return false;
@@ -190,8 +190,8 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Behandelt die Kollision mit einem Gegner.
-   * @param {MovableObject} enemy - Der getroffene Gegner
+   * Handles the collision with an enemy.
+   * @param {MovableObject} enemy - The enemy that was hit
    */
   handleEnemyCollision(enemy) {
     this.stopMovement();
@@ -202,7 +202,7 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Stoppt die Bewegung der Flasche.
+   * Stops the movement of the bottle.
    */
   stopMovement() {
     clearInterval(this.moveInterval);
@@ -210,8 +210,8 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Positioniert die Flasche auf dem getroffenen Gegner.
-   * @param {MovableObject} enemy - Der getroffene Gegner
+   * Positions the bottle on the hit enemy.
+   * @param {MovableObject} enemy - The hit enemy
    */
   positionBottleOnEnemy(enemy) {
     this.y = enemy.y + enemy.height / 2 - this.height / 2;
@@ -219,7 +219,7 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Initiiert die Splash-Animation.
+   * Initiates the splash animation.
    */
   initiateSplash() {
     this.hasSplashed = true;
@@ -228,8 +228,8 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Fügt dem Gegner Schaden zu.
-   * @param {MovableObject} enemy - Der getroffene Gegner
+   * Damages the enemy.
+   * @param {MovableObject} enemy - The hit enemy
    */
   damageEnemy(enemy) {
     if (enemy instanceof Endboss) {
@@ -244,9 +244,9 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Zeigt die Splash-Animation an einer bestimmten Position.
-   * @param {number} x - Die X-Position für die Splash-Animation
-   * @param {number} y - Die Y-Position für die Splash-Animation
+   * Shows the splash animation at a specific position.
+   * @param {number} x - The X position for the splash animation
+   * @param {number} y - The Y position for the splash animation
    */
   showSplash(x, y) {
     this.x = x;
@@ -256,7 +256,7 @@ class ThrowableObject extends MovableObject {
   }
 
   /**
-   * Stoppt die Schwerkraftwirkung auf die Flasche.
+   * Stops the gravity effect on the bottle.
    */
   stopGravity() {
     this.speedY = 0;
