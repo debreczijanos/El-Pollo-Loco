@@ -287,23 +287,63 @@ function setupMobileControls() {
   const btnThrow = document.querySelector("#btn-throw");
 
   if (btnLeft) {
-    btnLeft.addEventListener("touchstart", () => (keyboard.LEFT = true));
-    btnLeft.addEventListener("touchend", () => (keyboard.LEFT = false));
+    btnLeft.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      keyboard.LEFT = true;
+    });
+    btnLeft.addEventListener("touchend", (e) => {
+      e.preventDefault();
+      keyboard.LEFT = false;
+    });
+    btnLeft.addEventListener("touchcancel", (e) => {
+      e.preventDefault();
+      keyboard.LEFT = false;
+    });
   }
 
   if (btnRight) {
-    btnRight.addEventListener("touchstart", () => (keyboard.RIGHT = true));
-    btnRight.addEventListener("touchend", () => (keyboard.RIGHT = false));
+    btnRight.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      keyboard.RIGHT = true;
+    });
+    btnRight.addEventListener("touchend", (e) => {
+      e.preventDefault();
+      keyboard.RIGHT = false;
+    });
+    btnRight.addEventListener("touchcancel", (e) => {
+      e.preventDefault();
+      keyboard.RIGHT = false;
+    });
   }
 
   if (btnJump) {
-    btnJump.addEventListener("touchstart", () => (keyboard.SPACE = true));
-    btnJump.addEventListener("touchend", () => (keyboard.SPACE = false));
+    btnJump.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      keyboard.SPACE = true;
+    });
+    btnJump.addEventListener("touchend", (e) => {
+      e.preventDefault();
+      keyboard.SPACE = false;
+    });
+    btnJump.addEventListener("touchcancel", (e) => {
+      e.preventDefault();
+      keyboard.SPACE = false;
+    });
   }
 
   if (btnThrow) {
-    btnThrow.addEventListener("touchstart", () => (keyboard.D = true));
-    btnThrow.addEventListener("touchend", () => (keyboard.D = false));
+    btnThrow.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      keyboard.D = true;
+    });
+    btnThrow.addEventListener("touchend", (e) => {
+      e.preventDefault();
+      keyboard.D = false;
+    });
+    btnThrow.addEventListener("touchcancel", (e) => {
+      e.preventDefault();
+      keyboard.D = false;
+    });
   }
 }
 

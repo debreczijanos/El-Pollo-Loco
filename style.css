@@ -5,6 +5,8 @@
 
 body,
 #gameScreen {
+  overflow: hidden;
+  touch-action: none;
   margin: 0;
   padding: 0;
   display: flex;
@@ -298,4 +300,12 @@ canvas {
 /* Aktiver Button */
 .button-active {
   background-color: #ffc740 !important; /* Oder eine andere schöne Farbe */
+}
+
+#btn-left,
+#btn-right,
+#btn-jump,
+#btn-throw {
+  touch-action: none;
+  -ms-touch-action: none;
 }
