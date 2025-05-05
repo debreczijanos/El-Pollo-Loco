@@ -18,7 +18,7 @@ body,
   background-image: url(./img/10_start_background/01.jpg);
   background-position: center;
   background-repeat: no-repeat;
-  background-size: auto;
+  background-size: cover;
 }
 
 #gameScreen {

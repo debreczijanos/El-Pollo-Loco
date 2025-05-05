@@ -24,22 +24,55 @@ class Bottle extends DrawableObject {
    */
   constructor() {
     super();
+    this.initDimensions();
+    this.initPosition();
+    this.initHitbox();
+  }
+
+  /**
+   * Initializes the dimensions of the bottle.
+   */
+  initDimensions() {
     this.width = 50;
     this.height = 50;
+  }
 
+  /**
+   * Initializes the position and appearance of the bottle.
+   * Randomly determines if the bottle is in the air or on the ground.
+   */
+  initPosition() {
     this.x = Math.random() * 1800;
-    let isAirBottle = Math.random() < 0.5;
+    const isAirBottle = Math.random() < 0.5;
 
     if (isAirBottle) {
-      this.y = Math.random() * (300 - 150) + 150;
-      this.loadImage(this.IMAGES_BOTTLE_ON_AIR[0]);
+      this.initAirBottle();
     } else {
-      this.y = 370;
-      this.loadImage(
-        this.IMAGES_BOTTLE_ON_GROUND[Math.floor(Math.random() * 2)]
-      );
+      this.initGroundBottle();
     }
+  }
 
-    this.hitbox = { top: 10, bottom: 10, left: 10, right: 10 };
+  /**
+   * Initializes a bottle that is in the air.
+   */
+  initAirBottle() {
+    this.y = Math.random() * (300 - 150) + 150;
+    this.loadImage(this.IMAGES_BOTTLE_ON_AIR[0]);
+  }
+
+  /**
+   * Initializes a bottle that is on the ground.
+   */
+  initGroundBottle() {
+    this.y = 370;
+    const randomIndex = Math.floor(Math.random() * 2);
+    this.loadImage(this.IMAGES_BOTTLE_ON_GROUND[randomIndex]);
+  }
+
+  /**
+   * Initializes the hitbox for collision detection.
+   */
+  initHitbox() {
+    this.hitbox = { top: 0, bottom: 0, left: 20, right: 20 };
   }
 }

@@ -228,6 +228,17 @@ window.addEventListener("keyup", (e) => {
  * Restarts the game by resetting all game states and initializing a new game.
  */
 function restartGame() {
+  cleanupPreviousGame();
+  hideGameScreens();
+  resetGameState();
+  init();
+  restoreSoundState();
+}
+
+/**
+ * Cleans up resources from the previous game.
+ */
+function cleanupPreviousGame() {
   if (world) {
     if (world.gameInterval) {
       clearInterval(world.gameInterval);
@@ -236,15 +247,28 @@ function restartGame() {
       cancelAnimationFrame(world.animationFrame);
     }
   }
+}
 
+/**
+ * Hides all game screens.
+ */
+function hideGameScreens() {
   document.getElementById("game-over-screen").style.display = "none";
   document.getElementById("victory-screen").style.display = "none";
+}
 
+/**
+ * Resets game state variables.
+ */
+function resetGameState() {
   world = null;
   canvas = null;
+}
 
-  init();
-
+/**
+ * Restores the previous sound state.
+ */
+function restoreSoundState() {
   const soundBtn = document.getElementById("soundToggleBtn");
   const isMuted = soundBtn.textContent === "🔇";
 
@@ -281,70 +305,7 @@ function startGame() {
  * Sets up mobile controls by adding touch event listeners to control buttons.
  */
 function setupMobileControls() {
-  const btnLeft = document.querySelector("#btn-left");
-  const btnRight = document.querySelector("#btn-right");
-  const btnJump = document.querySelector("#btn-jump");
-  const btnThrow = document.querySelector("#btn-throw");
-
-  if (btnLeft) {
-    btnLeft.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      keyboard.LEFT = true;
-    });
-    btnLeft.addEventListener("touchend", (e) => {
-      e.preventDefault();
-      keyboard.LEFT = false;
-    });
-    btnLeft.addEventListener("touchcancel", (e) => {
-      e.preventDefault();
-      keyboard.LEFT = false;
-    });
-  }
-
-  if (btnRight) {
-    btnRight.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      keyboard.RIGHT = true;
-    });
-    btnRight.addEventListener("touchend", (e) => {
-      e.preventDefault();
-      keyboard.RIGHT = false;
-    });
-    btnRight.addEventListener("touchcancel", (e) => {
-      e.preventDefault();
-      keyboard.RIGHT = false;
-    });
-  }
-
-  if (btnJump) {
-    btnJump.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      keyboard.SPACE = true;
-    });
-    btnJump.addEventListener("touchend", (e) => {
-      e.preventDefault();
-      keyboard.SPACE = false;
-    });
-    btnJump.addEventListener("touchcancel", (e) => {
-      e.preventDefault();
-      keyboard.SPACE = false;
-    });
-  }
-
-  if (btnThrow) {
-    btnThrow.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      keyboard.D = true;
-    });
-    btnThrow.addEventListener("touchend", (e) => {
-      e.preventDefault();
-      keyboard.D = false;
-    });
-    btnThrow.addEventListener("touchcancel", (e) => {
-      e.preventDefault();
-      keyboard.D = false;
-    });
-  }
+  new MobileControls(keyboard);
 }
 
 /**

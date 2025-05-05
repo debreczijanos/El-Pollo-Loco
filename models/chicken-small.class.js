@@ -28,7 +28,6 @@ class ChickenSmall extends Chicken {
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_DEAD);
     this.loadImage(this.IMAGES_WALKING[0]);
-
     this.animate();
   }
 }

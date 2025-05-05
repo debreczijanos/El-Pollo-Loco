@@ -58,7 +58,6 @@ class Chicken extends MovableObject {
   hit() {
     if (this.isDead) return;
     this.isDead = true;
-
     if (world && world.soundManager) {
       world.soundManager.playSound("hit");
     }

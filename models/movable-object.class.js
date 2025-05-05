@@ -42,20 +42,93 @@ class MovableObject extends DrawableObject {
 
   /**
    * Applies gravity to the object.
-   * Updates the vertical position based on the speed.
+   * Updates the vertical position and handles ground collision.
    */
   applyGravity() {
     setInterval(() => {
-      if (this.isAboveGround() || this.speedY > 0) {
-        this.y -= this.speedY;
-        this.speedY -= this.acceleration;
-      }
-      if (this.y >= 360) {
-        this.y = 390;
-        this.speedY = 0;
-        this.playAnimation(this.IMAGES_BOTTLE_SPLASH);
-      }
+      this.updateVerticalPosition();
+      this.handleGroundCollision();
     }, 1000 / 60);
+  }
+
+  /**
+   * Updates the vertical position based on speed and acceleration.
+   */
+  updateVerticalPosition() {
+    if (this.isAboveGround() || this.speedY > 0) {
+      this.y -= this.speedY;
+      this.speedY -= this.acceleration;
+    }
+  }
+
+  /**
+   * Handles collision with the ground depending on object type.
+   */
+  handleGroundCollision() {
+    if (this.isThrowableObjectOnGround()) {
+      this.handleThrowableObjectGround();
+    } else if (this.isCharacterOnGround()) {
+      this.handleCharacterGround();
+    } else if (this.isOtherOnGround()) {
+      this.handleOtherGround();
+    }
+  }
+
+  /**
+   * Checks if this object is a ThrowableObject and on the ground.
+   * @returns {boolean}
+   */
+  isThrowableObjectOnGround() {
+    return this instanceof ThrowableObject && this.y >= 360;
+  }
+
+  /**
+   * Handles ground collision for ThrowableObject.
+   */
+  handleThrowableObjectGround() {
+    this.y = 390;
+    this.speedY = 0;
+    this.playAnimation(this.IMAGES_BOTTLE_SPLASH);
+  }
+
+  /**
+   * Checks if this object is a Character and on the ground.
+   * @returns {boolean}
+   */
+  isCharacterOnGround() {
+    return (
+      this instanceof Character &&
+      this.y + this.height >= 360 &&
+      this.speedY <= 0
+    );
+  }
+
+  /**
+   * Handles ground collision for Character.
+   */
+  handleCharacterGround() {
+    this.y = 360 - this.height + 70;
+    this.speedY = 0;
+  }
+
+  /**
+   * Checks if this object is another MovableObject (e.g. Chicken) and on the ground.
+   * @returns {boolean}
+   */
+  isOtherOnGround() {
+    return (
+      !(this instanceof ThrowableObject) &&
+      !(this instanceof Character) &&
+      this.y + this.height >= 360
+    );
+  }
+
+  /**
+   * Handles ground collision for other MovableObjects (e.g. Chicken).
+   */
+  handleOtherGround() {
+    this.y = 360 - this.height;
+    this.speedY = 0;
   }
 
   /**

@@ -128,6 +128,8 @@ class Endboss extends MovableObject {
     this.statusBar = statusBar;
     this.world = world;
     this.x = 2500;
+    this.animations = new EndbossAnimations();
+    this.movement = new EndbossMovement();
     this.animate();
   }
 
@@ -158,7 +160,7 @@ class Endboss extends MovableObject {
     if (this.energy <= 0) {
       this.handleDeath();
     } else {
-      this.playHurtAnimation();
+      this.animations.playHurtAnimation(this);
     }
   }
 
@@ -169,7 +171,7 @@ class Endboss extends MovableObject {
     this.energy = 0;
     this.isDead = true;
     this.playVictorySound();
-    this.animateDeath(() => {
+    this.animations.animateDeath(this, () => {
       this.removeFromGame();
     });
   }
@@ -204,213 +206,11 @@ class Endboss extends MovableObject {
   }
 
   /**
-   * Plays the hurt animation sequence.
-   */
-  playHurtAnimation() {
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < this.IMAGES_HURT.length) {
-        this.img = this.imageCache[this.IMAGES_HURT[i]];
-        i++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 140);
-  }
-
-  /**
    * Handles the attack sequence.
    */
   playAttackAnimation() {
-    if (this.canStartAttack()) {
-      this.startAttack();
-    }
-  }
-
-  /**
-   * Checks if the endboss can start an attack.
-   */
-  canStartAttack() {
-    return (
-      !this.isAttacking &&
-      !this.world.character.isDead() &&
-      !this.otherDirection
-    );
-  }
-
-  /**
-   * Starts the attack sequence.
-   */
-  startAttack() {
-    this.isAttacking = true;
-    this.playAttackFrames();
-  }
-
-  /**
-   * Plays the attack animation frames.
-   */
-  playAttackFrames() {
-    let i = 0;
-    const interval = setInterval(() => {
-      if (this.shouldStopAttack(interval)) return;
-
-      if (i < this.IMAGES_ATTACK.length) {
-        this.img = this.imageCache[this.IMAGES_ATTACK[i]];
-        i++;
-      } else {
-        clearInterval(interval);
-        this.jumpTowardsCharacter();
-      }
-    }, 100);
-  }
-
-  /**
-   * Checks if the attack should be stopped.
-   */
-  shouldStopAttack(interval) {
-    if (this.world.character.isDead()) {
-      clearInterval(interval);
-      this.isAttacking = false;
-      this.playAlertAnimation();
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Makes the endboss jump towards the character.
-   */
-  jumpTowardsCharacter() {
-    const char = this.world.character;
-    if (this.shouldCancelJump(char)) return;
-
-    const jumpParams = this.calculateJumpParameters(char);
-    this.executeJump(jumpParams);
-  }
-
-  /**
-   * Checks if the jump should be cancelled.
-   */
-  shouldCancelJump(char) {
-    if (char.isDead()) {
-      this.isAttacking = false;
-      this.playAlertAnimation();
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Calculates jump parameters.
-   */
-  calculateJumpParameters(char) {
-    return {
-      startX: this.x,
-      startY: this.y,
-      targetX: char.x + char.width / 2 - this.width / 2,
-      targetY: char.y + char.height - this.height,
-      steps: 20,
-    };
-  }
-
-  /**
-   * Executes the jump animation.
-   */
-  executeJump(params) {
-    let step = 0;
-    const interval = setInterval(() => {
-      if (this.shouldCancelJump(this.world.character)) {
-        clearInterval(interval);
-        return;
-      }
-
-      this.updateJumpPosition(params, step);
-
-      step++;
-      if (step > params.steps) {
-        this.finishJump(interval);
-      }
-    }, 40);
-  }
-
-  /**
-   * Updates the position during jump.
-   */
-  updateJumpPosition(params, step) {
-    const t = step / params.steps;
-    this.x = params.startX + (params.targetX - params.startX) * t;
-    this.y =
-      params.startY +
-      (params.targetY - params.startY) * t -
-      120 * Math.sin(Math.PI * t);
-  }
-
-  /**
-   * Finishes the jump sequence.
-   */
-  finishJump(interval) {
-    clearInterval(interval);
-    this.handleCharacterCollision();
-    this.isAttacking = false;
-    this.fallToGround();
-  }
-
-  /**
-   * Handles collision with character.
-   */
-  handleCharacterCollision() {
-    const char = this.world.character;
-    if (!char.isDead() && this.isColliding(char)) {
-      char.energy = 0;
-      char.lastHit = new Date().getTime();
-      this.world.statusBar.setPrecentage(char.energy);
-      this.playAlertAnimation();
-    }
-  }
-
-  /**
-   * Makes the endboss fall to the ground.
-   */
-  fallToGround() {
-    const groundY = 55;
-    const fallInterval = setInterval(() => {
-      if (this.y < groundY) {
-        this.y += 5;
-      } else {
-        this.y = groundY;
-        clearInterval(fallInterval);
-      }
-    }, 40);
-  }
-
-  /**
-   * Animates the death sequence.
-   */
-  animateDeath(callback) {
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < this.IMAGES_DEAD.length) {
-        this.img = this.imageCache[this.IMAGES_DEAD[i]];
-        i++;
-      } else {
-        clearInterval(interval);
-        setTimeout(() => {
-          if (callback) callback();
-        }, 1000);
-      }
-    }, 500);
-  }
-
-  /**
-   * Plays the alert animation.
-   */
-  playAlertAnimation() {
-    let i = 0;
-    clearInterval(this.alertInterval);
-    this.alertInterval = setInterval(() => {
-      this.img = this.imageCache[this.IMAGES_ALERT[i]];
-      i = (i + 1) % this.IMAGES_ALERT.length;
-    }, 120);
+    this.animations.playAttackAnimation(this);
+    this.movement.jumpTowardsCharacter(this);
   }
 
   /**
@@ -496,5 +296,24 @@ class Endboss extends MovableObject {
     this.x -= this.speedBoost ? 6 : 3;
     this.otherDirection = false;
     if (this.x <= 2200) this.directionLeft = false;
+  }
+
+  /**
+   * Jumps towards the character.
+   */
+  jumpTowardsCharacter() {
+    this.movement.jumpTowardsCharacter(this);
+  }
+
+  /**
+   * Checks if the endboss can start an attack.
+   * @returns {boolean} True if the endboss can start an attack, false otherwise.
+   */
+  canStartAttack() {
+    return (
+      !this.isAttacking &&
+      !this.world.character.isDead() &&
+      !this.otherDirection
+    );
   }
 }

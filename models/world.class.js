@@ -76,17 +76,39 @@ class World {
   game;
 
   /**
+   * The collision utility object.
+   * @type {CollisionUtils}
+   */
+  collisionUtils;
+
+  /**
    * Creates a new game world.
    * @param {HTMLCanvasElement} canvas - The canvas element for graphics
    * @param {Keyboard} keyboard - The keyboard input
    * @param {Game} game - The main game class
    */
   constructor(canvas, keyboard, game) {
+    this.initCanvasAndInput(canvas, keyboard, game);
+    this.initLevel();
+    this.initStatusBars();
+    this.collisionUtils = new CollisionUtils();
+    this.startGame();
+  }
+
+  /**
+   * Initializes canvas, context, keyboard, and game reference.
+   */
+  initCanvasAndInput(canvas, keyboard, game) {
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
     this.keyboard = keyboard;
     this.game = game;
+  }
 
+  /**
+   * Initializes the level and main character.
+   */
+  initLevel() {
     this.character = new Character();
     this.level = new Level(
       createEnemies(),
@@ -95,15 +117,90 @@ class World {
       [...level1.coins],
       [...level1.bottles]
     );
+  }
 
+  /**
+   * Initializes all status bars.
+   */
+  initStatusBars() {
     this.statusBar = new StatusBar();
     this.statusBarCoins = new StatusBarCoins();
     this.statusBarBottle = new StatusBarBottle();
     this.statusBarEndboss = new StatusBarEndboss();
+  }
 
+  /**
+   * Starts the world (draw, setWorld, run).
+   */
+  startGame() {
     this.draw();
     this.setWorld();
     this.run();
+  }
+
+  /**
+   * Draws all objects in the game world.
+   */
+  draw() {
+    this.clearCanvas();
+    this.drawBackground();
+    this.drawStatusBars();
+    this.drawGameObjects();
+    this.checkGameStateAndRedraw();
+  }
+
+  /**
+   * Clears the canvas.
+   * */
+  clearCanvas() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  /**
+   * Draws background objects and clouds.
+   * */
+  drawBackground() {
+    this.ctx.translate(this.camera_x, 0);
+    this.addObjectsToMap(this.level.backgroundObjects);
+    this.addObjectsToMap(this.level.clouds);
+    this.ctx.translate(-this.camera_x, 0);
+  }
+
+  /**
+   * Draws all status bars.
+   */
+  drawStatusBars() {
+    this.addToMap(this.statusBar);
+    this.addToMap(this.statusBarCoins);
+    this.addToMap(this.statusBarBottle);
+    this.addToMap(this.statusBarEndboss);
+    this.ctx.translate(this.camera_x, 0);
+  }
+
+  /**
+   * Draws character, coins, bottles, enemies, and throwable objects.
+   */
+  drawGameObjects() {
+    this.addToMap(this.character);
+    this.addObjectsToMap(this.level.coins);
+    this.addObjectsToMap(this.level.bottles);
+    this.addObjectsToMap(this.level.enemies);
+    this.addObjectsToMap(this.throwableObjects);
+    this.ctx.translate(-this.camera_x, 0);
+  }
+
+  /**
+   * Checks collisions, victory, and schedules next frame.
+   */
+  checkGameStateAndRedraw() {
+    this.checkCollisions();
+    if (this.game && this.game.checkVictory) {
+      this.game.checkVictory();
+    }
+    let self = this;
+    this.animationFrame = requestAnimationFrame(function () {
+      self.draw();
+    });
   }
 
   /**
@@ -132,43 +229,6 @@ class World {
       }
       this.checkBottleCollection();
     }, 200);
-  }
-
-  /**
-   * Draws all objects in the game world.
-   */
-  draw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    this.ctx.translate(this.camera_x, 0);
-    this.addObjectsToMap(this.level.backgroundObjects);
-    this.addObjectsToMap(this.level.clouds);
-
-    this.ctx.translate(-this.camera_x, 0);
-    this.addToMap(this.statusBar);
-    this.addToMap(this.statusBarCoins);
-    this.addToMap(this.statusBarBottle);
-    this.addToMap(this.statusBarEndboss);
-    this.ctx.translate(this.camera_x, 0);
-
-    this.addToMap(this.character);
-    this.addObjectsToMap(this.level.coins);
-    this.addObjectsToMap(this.level.bottles);
-    this.addObjectsToMap(this.level.enemies);
-    this.addObjectsToMap(this.throwableObjects);
-
-    this.ctx.translate(-this.camera_x, 0);
-
-    this.checkCollisions();
-
-    if (this.game && this.game.checkVictory) {
-      this.game.checkVictory();
-    }
-
-    let self = this;
-    this.animationFrame = requestAnimationFrame(function () {
-      self.draw();
-    });
   }
 
   /**
@@ -222,119 +282,9 @@ class World {
    * Checks for collisions between objects.
    */
   checkCollisions() {
-    if (this.checkStompOnEnemies()) return;
+    if (this.collisionUtils.checkStompOnEnemies(this)) return;
     if (this.character.justStomped) return;
-    this.checkSideCollisionOnEnemies();
-  }
-
-  checkStompOnEnemies() {
-    for (let enemy of this.level.enemies) {
-      if (this.shouldStompEnemy(enemy)) {
-        this.handleStompCollision(enemy);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  shouldStompEnemy(enemy) {
-    if (enemy.isDead || !(enemy instanceof Chicken)) return false;
-    const { charFeet, enemyMiddle, isHorizontal } =
-      this.getCollisionParams(enemy);
-    return charFeet < enemyMiddle && isHorizontal && this.character.speedY >= 0;
-  }
-
-  checkSideCollisionOnEnemies() {
-    for (let enemy of this.level.enemies) {
-      if (this.shouldSideCollideWithEnemy(enemy)) {
-        this.handleSideCollision();
-        break;
-      }
-    }
-  }
-
-  shouldSideCollideWithEnemy(enemy) {
-    if (enemy.isDead || !(enemy instanceof Chicken)) return false;
-    const { charFeet, enemyMiddle, isHorizontal } =
-      this.getCollisionParams(enemy);
-    return (
-      charFeet >= enemyMiddle &&
-      isHorizontal &&
-      this.isSideCollidingWithEnemy(
-        enemy,
-        this.character.y,
-        this.character.y + this.character.height,
-        this.character.x,
-        this.character.x + this.character.width
-      )
-    );
-  }
-
-  getCollisionParams(enemy) {
-    const a = this.character.hitbox || { top: 0, bottom: 0, left: 0, right: 0 };
-    const b = enemy.hitbox || { top: 0, bottom: 0, left: 0, right: 0 };
-    const charFeet = this.character.y + this.character.height - a.bottom;
-    const enemyTop = enemy.y + b.top;
-    const enemyBottom = enemy.y + enemy.height - b.bottom;
-    const enemyMiddle = (enemyTop + enemyBottom) / 2;
-    const cam = this.camera_x || 0;
-    const charLeft = this.character.x + a.left + cam;
-    const charRight = this.character.x + this.character.width - a.right + cam;
-    const enemyLeft = enemy.x + b.left + cam;
-    const enemyRight = enemy.x + enemy.width - b.right + cam;
-    const overlap =
-      Math.min(charRight, enemyRight) - Math.max(charLeft, enemyLeft);
-    const minOverlap =
-      Math.min(charRight - charLeft, enemyRight - enemyLeft) * 0.5;
-    const isHorizontal = overlap > minOverlap;
-    return { charFeet, enemyMiddle, isHorizontal };
-  }
-
-  /**
-   * Checks for collisions between character and enemies.
-   */
-  isSideCollidingWithEnemy(enemy, charTop, charBottom, charLeft, charRight) {
-    const enemyTop = enemy.y;
-    const enemyBottom = enemy.y + enemy.height;
-    const enemyLeft = enemy.x;
-    const enemyRight = enemy.x + enemy.width;
-
-    const isSmallChicken = enemy instanceof ChickenSmall;
-    const widthFactor = isSmallChicken ? 0.4 : 0.2;
-
-    return (
-      this.character.isColliding(enemy) &&
-      charRight > enemyLeft + enemy.width * widthFactor &&
-      charLeft < enemyRight - enemy.width * widthFactor &&
-      charBottom > enemyTop + enemy.height * 0.3 &&
-      charTop < enemyBottom - enemy.height * 0.3
-    );
-  }
-
-  /**
-   * Handles the collision between character and enemy.
-   * @param {MovableObject} enemy - The hit enemy
-   */
-  handleStompCollision(enemy) {
-    enemy.hit();
-    this.character.speedY = -15;
-    enemy.isDead = true;
-    enemy.ignoreCollisions = true;
-
-    this.character.justStomped = true;
-    setTimeout(() => {
-      this.character.justStomped = false;
-    }, 300);
-  }
-
-  /**
-   * Handles the character's hit.
-   */
-  handleSideCollision() {
-    if (!this.character.isHurt()) {
-      this.character.hit();
-      this.statusBar.setPrecentage(this.character.energy);
-    }
+    this.collisionUtils.checkSideCollisionOnEnemies(this);
   }
 
   /**
@@ -362,18 +312,15 @@ class World {
    */
   checkCoinCollection() {
     if (!this.level.coins?.length) return;
-
     this.character.collectedCoins =
       (this.character.collectedCoins || 0) +
       this.level.coins.reduce(
         (count, coin) => (this.character.isColliding(coin) ? count + 1 : count),
         0
       );
-
     this.level.coins = this.level.coins.filter(
       (coin) => !this.character.isColliding(coin)
     );
-
     this.statusBarCoins.setPrecentage(
       Math.min((this.character.collectedCoins / 5) * 100, 100)
     );
@@ -396,6 +343,34 @@ class World {
         }
         return true;
       });
+    }
+  }
+
+  /**
+   * Handles the collision between character and enemy.
+   * @param {MovableObject} enemy - The hit enemy
+   */
+  handleStompCollision(enemy) {
+    enemy.hit();
+    if (this.character.speedY >= 0) {
+      this.character.speedY = -5;
+    }
+    enemy.isDead = true;
+    enemy.ignoreCollisions = true;
+
+    this.character.justStomped = true;
+    setTimeout(() => {
+      this.character.justStomped = false;
+    }, 300);
+  }
+
+  /**
+   * Handles the character's hit.
+   */
+  handleSideCollision() {
+    if (!this.character.isHurt()) {
+      this.character.hit();
+      this.statusBar.setPrecentage(this.character.energy);
     }
   }
 }

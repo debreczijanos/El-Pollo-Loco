@@ -14,6 +14,8 @@ class Character extends MovableObject {
   collectedBottles = 0;
   /** @type {boolean} Flag indicating if the character just stomped an enemy */
   justStomped = false;
+  /** @type {boolean} Indicates if the jump animation is currently active */
+  isJumpingAnimationActive = false;
 
   /** @type {string[]} Array of image paths for walking animation */
   IMAGES_WALKING = [
@@ -96,7 +98,7 @@ class Character extends MovableObject {
   hasPlayedHurtSound = false;
 
   /** @type {object} Hitbox for the character */
-  hitbox = { top: 100, bottom: 0, left: 20, right: 20 };
+  hitbox = { top: 130, bottom: 0, left: 35, right: 35 };
 
   /**
    * Creates a new Character instance.
@@ -239,20 +241,65 @@ class Character extends MovableObject {
    */
   updateAnimationState(idleTime) {
     if (this.isHurt()) {
-      this.playAnimation(this.IMAGES_HURT);
-      this.playHurtSound();
+      this.handleHurtAnimation();
       return 0;
     } else if (this.isAboveGround()) {
-      this.playAnimation(this.IMAGES_JUMPING);
+      this.handleJumpAnimation();
       return 0;
-    } else if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-      this.playAnimation(this.IMAGES_WALKING);
+    } else if (this.isWalking()) {
+      this.handleWalkingAnimation();
       return 0;
     } else {
-      idleTime += 50;
-      this.updateIdleAnimation(idleTime);
-      return idleTime;
+      return this.handleIdleAnimation(idleTime);
     }
+  }
+
+  /**
+   * Handles the hurt animation and sound.
+   */
+  handleHurtAnimation() {
+    this.playAnimation(this.IMAGES_HURT);
+    this.playHurtSound();
+    this.isJumpingAnimationActive = false;
+  }
+
+  /**
+   * Handles the jump animation.
+   */
+  handleJumpAnimation() {
+    if (!this.isJumpingAnimationActive) {
+      this.currentImage = 0;
+      this.isJumpingAnimationActive = true;
+    }
+    this.playAnimation(this.IMAGES_JUMPING);
+  }
+
+  /**
+   * Handles the walking animation.
+   */
+  handleWalkingAnimation() {
+    this.playAnimation(this.IMAGES_WALKING);
+    this.isJumpingAnimationActive = false;
+  }
+
+  /**
+   * Handles the idle animation and returns updated idle time.
+   * @param {number} idleTime - Current idle time in milliseconds
+   * @returns {number} Updated idle time
+   */
+  handleIdleAnimation(idleTime) {
+    idleTime += 50;
+    this.updateIdleAnimation(idleTime);
+    this.isJumpingAnimationActive = false;
+    return idleTime;
+  }
+
+  /**
+   * Checks if the character is currently walking.
+   * @returns {boolean} True if walking, false otherwise
+   */
+  isWalking() {
+    return this.world.keyboard.RIGHT || this.world.keyboard.LEFT;
   }
 
   /**
