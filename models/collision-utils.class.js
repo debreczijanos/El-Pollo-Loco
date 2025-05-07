@@ -104,13 +104,13 @@ class CollisionUtils {
     const enemyLeft = enemy.x;
     const enemyRight = enemy.x + enemy.width;
     const isSmallChicken = enemy instanceof ChickenSmall;
-    const widthFactor = isSmallChicken ? 0.4 : 0.2;
+    const widthFactor = isSmallChicken ? 0.3 : 0.15;
     return (
       world.character.isColliding(enemy) &&
       charRight > enemyLeft + enemy.width * widthFactor &&
       charLeft < enemyRight - enemy.width * widthFactor &&
-      charBottom > enemyTop + enemy.height * 0.3 &&
-      charTop < enemyBottom - enemy.height * 0.3
+      charBottom > enemyTop + enemy.height * 0.2 &&
+      charTop < enemyBottom - enemy.height * 0.2
     );
   }
 
@@ -127,7 +127,10 @@ class CollisionUtils {
       enemy
     );
     return (
-      charFeet < enemyMiddle && isHorizontal && world.character.speedY >= 0
+      charFeet < enemyMiddle &&
+      isHorizontal &&
+      world.character.speedY > 0 &&
+      world.character.isColliding(enemy)
     );
   }
 

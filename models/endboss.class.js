@@ -249,8 +249,10 @@ class Endboss extends MovableObject {
    * Prepares for attack.
    */
   prepareAttack() {
+    if (this.isAttacking) return;
     this.otherDirection = false;
     this.directionLeft = true;
+    this.isAttacking = true;
     this.playAttackAnimation();
   }
 

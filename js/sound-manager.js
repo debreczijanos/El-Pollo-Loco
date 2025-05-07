@@ -69,16 +69,7 @@ class SoundManager {
     const sound = this.sounds[soundName];
     if (sound) {
       sound.currentTime = 0;
-
-      if (soundName === "walking") {
-        sound.play().catch((error) => {
-          console.warn(`Fehler beim Abspielen von ${soundName}:`, error);
-        });
-      } else {
-        sound.play().catch((error) => {
-          console.warn(`Fehler beim Abspielen von ${soundName}:`, error);
-        });
-      }
+      sound.play();
     }
   }
 
@@ -89,9 +80,7 @@ class SoundManager {
     if (this.isMuted) return;
 
     if (this.backgroundMusic) {
-      this.backgroundMusic.play().catch((error) => {
-        console.warn("Fehler beim Abspielen der Hintergrundmusik:", error);
-      });
+      this.backgroundMusic.play();
     }
   }
 

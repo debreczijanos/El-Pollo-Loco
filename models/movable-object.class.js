@@ -26,7 +26,7 @@ class MovableObject extends DrawableObject {
    * The acceleration of the object (for gravity).
    * @type {number}
    */
-  acceleration = 1.2;
+  acceleration = 1.0;
 
   /**
    * The energy/HP of the object.

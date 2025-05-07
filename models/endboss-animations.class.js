@@ -25,10 +25,7 @@ class EndbossAnimations {
    * @param {Endboss} endboss - The Endboss instance
    */
   playAttackAnimation(endboss) {
-    if (endboss.canStartAttack()) {
-      endboss.isAttacking = true;
-      this.playAttackFrames(endboss);
-    }
+    this.playAttackFrames(endboss);
   }
 
   /**
@@ -43,7 +40,6 @@ class EndbossAnimations {
         i++;
       } else {
         clearInterval(interval);
-        endboss.isAttacking = false;
       }
     }, 120);
   }

@@ -58,17 +58,43 @@ class Chicken extends MovableObject {
   hit() {
     if (this.isDead) return;
     this.isDead = true;
+
+    this.playHitSound();
+    this.updateAppearance();
+    this.stopMovementAndAnimation();
+    this.scheduleRemoval();
+  }
+
+  /**
+   * Plays the hit sound effect if the world and sound manager exist.
+   */
+  playHitSound() {
     if (world && world.soundManager) {
       world.soundManager.playSound("hit");
     }
+  }
 
+  /**
+   * Updates the chicken's appearance after being hit.
+   */
+  updateAppearance() {
     this.loadImage(this.IMAGES_DEAD[0]);
     this.speed = 0;
     this.y += 10;
+  }
 
+  /**
+   * Stops all movement and animation intervals.
+   */
+  stopMovementAndAnimation() {
     clearInterval(this.moveInterval);
     clearInterval(this.animationInterval);
+  }
 
+  /**
+   * Schedules the removal of the chicken from the game after a delay.
+   */
+  scheduleRemoval() {
     setTimeout(() => {
       let index = world.level.enemies.indexOf(this);
       if (index > -1) {

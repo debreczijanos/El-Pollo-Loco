@@ -82,6 +82,12 @@ class World {
   collisionUtils;
 
   /**
+   * Prevents multiple bottles from being thrown while the throw key is held down.
+   * Is set to true after a bottle is thrown and reset when the key is released.
+   */
+  bottleThrowBlocked = false;
+
+  /**
    * Creates a new game world.
    * @param {HTMLCanvasElement} canvas - The canvas element for graphics
    * @param {Keyboard} keyboard - The keyboard input
@@ -123,10 +129,10 @@ class World {
    * Initializes all status bars.
    */
   initStatusBars() {
-    this.statusBar = new StatusBar();
-    this.statusBarCoins = new StatusBarCoins();
-    this.statusBarBottle = new StatusBarBottle();
-    this.statusBarEndboss = new StatusBarEndboss();
+    this.statusBar = StatusBar.createHealthBar();
+    this.statusBarCoins = StatusBar.createCoinBar();
+    this.statusBarBottle = StatusBar.createBottleBar();
+    this.statusBarEndboss = StatusBar.createEndbossBar();
   }
 
   /**
@@ -181,11 +187,11 @@ class World {
    * Draws character, coins, bottles, enemies, and throwable objects.
    */
   drawGameObjects() {
-    this.addToMap(this.character);
     this.addObjectsToMap(this.level.coins);
     this.addObjectsToMap(this.level.bottles);
     this.addObjectsToMap(this.level.enemies);
     this.addObjectsToMap(this.throwableObjects);
+    this.addToMap(this.character);
     this.ctx.translate(-this.camera_x, 0);
   }
 
@@ -228,7 +234,7 @@ class World {
         this.checkCoinCollection();
       }
       this.checkBottleCollection();
-    }, 200);
+    }, 60);
   }
 
   /**
@@ -239,10 +245,8 @@ class World {
     if (mo.otherDirection) {
       this.flipImage(mo);
     }
-
     mo.draw(this.ctx);
     mo.drawFrame(this.ctx);
-
     if (mo.otherDirection) {
       this.flipImageBack(mo);
     }
@@ -289,22 +293,55 @@ class World {
 
   /**
    * Checks and updates the state of throwable objects.
+   * Handles input and release logic for bottle throwing.
    */
   checkThrowableObjects() {
-    if (this.keyboard.D && this.character.collectedBottles > 0) {
-      let throwDirection = this.character.otherDirection ? -1 : 1;
-      let bottle = new ThrowableObject(
-        this.character.x + (throwDirection === 1 ? 100 : -10),
-        this.character.y + 130,
-        throwDirection
-      );
-      bottle.speedX = 13 * throwDirection;
-      this.throwableObjects.push(bottle);
-      this.character.collectedBottles--;
-      this.statusBarBottle.setPrecentage(
-        (this.character.collectedBottles / 5) * 100
-      );
+    this.handleBottleThrowInput();
+    this.handleBottleThrowRelease();
+  }
+
+  /**
+   * Handles the input logic for throwing a bottle.
+   * Checks if the throw key is pressed and a bottle is available, then throws one bottle per key press.
+   */
+  handleBottleThrowInput() {
+    if (
+      this.keyboard.D &&
+      this.character.collectedBottles > 0 &&
+      !this.bottleThrowBlocked
+    ) {
+      this.throwBottle();
+      this.bottleThrowBlocked = true;
     }
+  }
+
+  /**
+   * Handles the release logic for the throw key.
+   * Resets the throw block so the player can throw again after releasing the key.
+   */
+  handleBottleThrowRelease() {
+    if (!this.keyboard.D) {
+      this.bottleThrowBlocked = false;
+    }
+  }
+
+  /**
+   * Creates and throws a new bottle object.
+   * Updates the bottle count and the status bar accordingly.
+   */
+  throwBottle() {
+    let throwDirection = this.character.otherDirection ? -1 : 1;
+    let bottle = new ThrowableObject(
+      this.character.x + (throwDirection === 1 ? 100 : -10),
+      this.character.y + 130,
+      throwDirection
+    );
+    bottle.speedX = 13 * throwDirection;
+    this.throwableObjects.push(bottle);
+    this.character.collectedBottles--;
+    this.statusBarBottle.setPrecentage(
+      (this.character.collectedBottles / 5) * 100
+    );
   }
 
   /**

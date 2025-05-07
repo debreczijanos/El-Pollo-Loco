@@ -40,7 +40,7 @@ class EndbossMovement {
       startY: endboss.y,
       targetX: char.x + char.width / 2 - endboss.width / 2,
       targetY: char.y + char.height - endboss.height,
-      steps: 20,
+      steps: 40,
     };
   }
 
@@ -61,7 +61,7 @@ class EndbossMovement {
       if (step > params.steps) {
         this.finishJump(endboss, interval);
       }
-    }, 40);
+    }, 20);
   }
 
   /**
@@ -97,12 +97,33 @@ class EndbossMovement {
    */
   handleCharacterCollision(endboss) {
     const char = endboss.world.character;
-    if (!char.isDead() && endboss.isColliding(char)) {
+    if (!char.isDead() && this.isValidCollision(endboss, char)) {
       char.energy = 0;
       char.lastHit = new Date().getTime();
       endboss.world.statusBar.setPrecentage(char.energy);
       endboss.animations.playAlertAnimation(endboss);
     }
+  }
+
+  /**
+   * Checks if there is a valid collision between endboss and character.
+   * @param {Endboss} endboss
+   * @param {Character} char
+   * @returns {boolean}
+   */
+  isValidCollision(endboss, char) {
+    const tolerance = 20;
+    const overlapX =
+      endboss.x + tolerance < char.x + char.width - tolerance &&
+      endboss.x + endboss.width - tolerance > char.x + tolerance;
+    const overlapY =
+      endboss.y + endboss.height > char.y + tolerance &&
+      endboss.y < char.y + char.height - tolerance;
+    const minOverlap = char.width * 0.5;
+    const actualOverlap =
+      Math.min(endboss.x + endboss.width, char.x + char.width) -
+      Math.max(endboss.x, char.x);
+    return overlapX && overlapY && actualOverlap > minOverlap;
   }
 
   /**
@@ -113,12 +134,12 @@ class EndbossMovement {
     const groundY = 55;
     const fallInterval = setInterval(() => {
       if (endboss.y < groundY) {
-        endboss.y += 5;
+        endboss.y += 3;
       } else {
         endboss.y = groundY;
         clearInterval(fallInterval);
       }
-    }, 40);
+    }, 20);
   }
 
   /**
