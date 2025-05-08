@@ -128,6 +128,7 @@ class Endboss extends MovableObject {
     this.statusBar = statusBar;
     this.world = world;
     this.x = 2500;
+    this.baseSpeed = 3;
     this.animations = new EndbossAnimations();
     this.movement = new EndbossMovement();
     this.animate();
@@ -224,14 +225,104 @@ class Endboss extends MovableObject {
   }
 
   /**
-   * Updates the endboss behavior.
+   * Updates the endboss behavior based on energy level and character position.
+   * This is the main behavior control function.
    */
   updateBehavior() {
     const char = this.world.character;
+    this.speedBoost = this.energy < 80;
+    this.handleBehaviorBasedOnEnergy(char);
+  }
+
+  /**
+   * Determines which behavior phase to activate based on current energy level.
+   * @param {Character} char - The character to interact with
+   */
+  handleBehaviorBasedOnEnergy(char) {
+    if (this.energy < 30) {
+      this.handleAggressivePhase(char);
+    } else if (this.energy < 50) {
+      this.handleChasePhase(char);
+    } else {
+      this.handleNormalPhase(char);
+    }
+  }
+
+  /**
+   * Handles the aggressive phase behavior when energy is below 30%.
+   * Endboss becomes extremely fast and aggressive.
+   * @param {Character} char - The character to interact with
+   */
+  handleAggressivePhase(char) {
+    if (this.shouldAttack(char)) {
+      this.prepareAttack();
+    } else {
+      this.aggressiveFollow();
+    }
+  }
+
+  /**
+   * Handles the chase phase behavior when energy is between 30% and 50%.
+   * Endboss actively follows the character.
+   * @param {Character} char - The character to interact with
+   */
+  handleChasePhase(char) {
+    if (this.shouldAttack(char)) {
+      this.prepareAttack();
+    } else {
+      this.followCharacter();
+    }
+  }
+
+  /**
+   * Handles the normal phase behavior when energy is above 50%.
+   * Endboss moves in a standard pattern.
+   * @param {Character} char - The character to interact with
+   */
+  handleNormalPhase(char) {
     if (this.shouldAttack(char)) {
       this.prepareAttack();
     } else if (this.shouldMove()) {
       this.move();
+    }
+  }
+
+  /**
+   * Makes the endboss follow the character at maximum speed.
+   * Used during the aggressive phase.
+   */
+  aggressiveFollow() {
+    const char = this.world.character;
+    this.playAnimation(this.IMAGES_WALKING);
+    const speed = this.baseSpeed * 8;
+    if (char.x > this.x) {
+      this.x += speed;
+      this.otherDirection = true;
+      this.directionLeft = false;
+    } else {
+      this.x -= speed;
+      this.otherDirection = false;
+      this.directionLeft = true;
+    }
+  }
+
+  /**
+   * Makes the endboss follow the character at normal or boosted speed.
+   * Used during the chase phase (30-50% energy).
+   * Speed is increased when energy is below 80%.
+   */
+  followCharacter() {
+    const char = this.world.character;
+    this.playAnimation(this.IMAGES_WALKING);
+    const speed = this.speedBoost ? this.baseSpeed * 4 : this.baseSpeed;
+    if (char.x > this.x) {
+      this.x += speed;
+      this.otherDirection = true;
+      this.directionLeft = false;
+    } else {
+      this.x -= speed;
+      this.otherDirection = false;
+      this.directionLeft = true;
     }
   }
 
@@ -286,7 +377,8 @@ class Endboss extends MovableObject {
    * Moves the endboss right.
    */
   moveRight() {
-    this.x += this.speedBoost ? 6 : 3;
+    const speed = this.speedBoost ? this.baseSpeed * 2 : this.baseSpeed;
+    this.x += speed;
     this.otherDirection = true;
     if (this.x >= 2700) this.directionLeft = true;
   }
@@ -295,7 +387,8 @@ class Endboss extends MovableObject {
    * Moves the endboss left.
    */
   moveLeft() {
-    this.x -= this.speedBoost ? 6 : 3;
+    const speed = this.speedBoost ? this.baseSpeed * 2 : this.baseSpeed;
+    this.x -= speed;
     this.otherDirection = false;
     if (this.x <= 2200) this.directionLeft = false;
   }

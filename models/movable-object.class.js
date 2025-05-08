@@ -197,7 +197,6 @@ class MovableObject extends DrawableObject {
    */
   playAnimation(images) {
     if (!images || images.length === 0) {
-      console.error("Error: Image array is undefined or empty!", images);
       return;
     }
 
@@ -206,8 +205,6 @@ class MovableObject extends DrawableObject {
 
     if (this.imageCache[path]) {
       this.img = this.imageCache[path];
-    } else {
-      console.warn("Image not found:", path);
     }
 
     this.currentImage++;
