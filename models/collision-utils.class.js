@@ -76,9 +76,7 @@ class CollisionUtils {
     const enemyRight = enemy.x + enemy.width - b.right + cam;
     const overlap =
       Math.min(charRight, enemyRight) - Math.max(charLeft, enemyLeft);
-    const minOverlap =
-      Math.min(charRight - charLeft, enemyRight - enemyLeft) * 0.5;
-    return overlap > minOverlap;
+    return overlap > 0;
   }
 
   /**
@@ -142,6 +140,7 @@ class CollisionUtils {
    */
   shouldSideCollideWithEnemy(world, enemy) {
     if (enemy.isDead || !(enemy instanceof Chicken)) return false;
+    if (!world.character.isCharacterOnGround()) return false;
     const { charFeet, enemyMiddle, isHorizontal } = this.getCollisionParams(
       world,
       enemy

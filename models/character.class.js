@@ -98,7 +98,7 @@ class Character extends MovableObject {
   hasPlayedHurtSound = false;
 
   /** @type {object} Hitbox for the character */
-  hitbox = { top: 130, bottom: 0, left: 35, right: 35 };
+  hitbox = { top: 130, bottom: 0, left: 30, right: 30 };
 
   /**
    * Creates a new Character instance.

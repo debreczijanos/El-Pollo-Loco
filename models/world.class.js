@@ -389,7 +389,7 @@ class World {
    */
   handleStompCollision(enemy) {
     enemy.hit();
-    if (this.character.speedY >= 0) {
+    if (this.character.speedY > 0) {
       this.character.speedY = -5;
     }
     enemy.isDead = true;
