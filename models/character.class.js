@@ -100,6 +100,9 @@ class Character extends MovableObject {
   /** @type {object} Hitbox for the character */
   hitbox = { top: 130, bottom: 0, left: 30, right: 30 };
 
+  /** @type {boolean} Flag indicating if the character is invulnerable after stomping */
+  stompInvulnerable = false;
+
   /**
    * Creates a new Character instance.
    * Loads all necessary images and sets up initial state.
@@ -235,12 +238,11 @@ class Character extends MovableObject {
   }
 
   /**
-   * Updates the character's animation state based on current conditions.
-   * @param {number} idleTime - Current idle time in milliseconds
-   * @returns {number} Updated idle time
+   * Updated die Animations-States, ohne die Steuerung zu blockieren.
+   * Hurt-Animation wird nur angezeigt, wenn der Charakter nicht springt.
    */
   updateAnimationState(idleTime) {
-    if (this.isHurt()) {
+    if (this.isHurt() && !this.isAboveGround()) {
       this.handleHurtAnimation();
       return 0;
     } else if (this.isAboveGround()) {
@@ -372,5 +374,12 @@ class Character extends MovableObject {
         this.hasPlayedHurtSound = false;
       }, 1000);
     }
+  }
+
+  /**
+   * Gibt true zurück, wenn der Charakter nach unten fällt.
+   */
+  isFalling() {
+    return this.speedY > 0;
   }
 }

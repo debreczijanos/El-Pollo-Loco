@@ -230,4 +230,16 @@ class MovableObject extends DrawableObject {
   jump() {
     this.speedY = 30;
   }
+
+  /**
+   * Checks if the object is on the ground.
+   * @returns {boolean} - True if the object is on the ground
+   */
+  isOnGround() {
+    if (this instanceof Character) {
+      return this.y + this.height >= 360 + 70 && this.speedY === 0;
+    } else {
+      return this.y + this.height >= 360 && this.speedY === 0;
+    }
+  }
 }

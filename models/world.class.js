@@ -286,9 +286,7 @@ class World {
    * Checks for collisions between objects.
    */
   checkCollisions() {
-    if (this.collisionUtils.checkStompOnEnemies(this)) return;
-    if (this.character.justStomped) return;
-    this.collisionUtils.checkSideCollisionOnEnemies(this);
+    this.collisionUtils.checkCharacterEnemyCollisions(this);
   }
 
   /**
@@ -380,34 +378,6 @@ class World {
         }
         return true;
       });
-    }
-  }
-
-  /**
-   * Handles the collision between character and enemy.
-   * @param {MovableObject} enemy - The hit enemy
-   */
-  handleStompCollision(enemy) {
-    enemy.hit();
-    if (this.character.speedY > 0) {
-      this.character.speedY = -5;
-    }
-    enemy.isDead = true;
-    enemy.ignoreCollisions = true;
-
-    this.character.justStomped = true;
-    setTimeout(() => {
-      this.character.justStomped = false;
-    }, 300);
-  }
-
-  /**
-   * Handles the character's hit.
-   */
-  handleSideCollision() {
-    if (!this.character.isHurt()) {
-      this.character.hit();
-      this.statusBar.setPrecentage(this.character.energy);
     }
   }
 }
