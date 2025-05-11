@@ -19,7 +19,7 @@ class Chicken extends MovableObject {
     "img/3_enemies_chicken/chicken_normal/1_walk/3_w.png",
   ];
   /** @type {string[]} Array of image paths for death animation */
-  IMAGES_DEAD = ["img/3_enemies_chicken/chicken_small/2_dead/dead.png"];
+  IMAGES_DEAD = ["img/3_enemies_chicken/chicken_normal/2_dead/dead.png"];
   hitbox = { top: 0, bottom: 0, left: 0, right: 0 };
 
   /**

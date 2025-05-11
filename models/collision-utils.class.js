@@ -11,12 +11,13 @@ class CollisionUtils {
   checkCharacterEnemyCollisions(world) {
     for (let enemy of world.level.enemies) {
       if (enemy.isDead || enemy.ignoreCollisions) continue;
-      if (world.character.isColliding(enemy)) {
-        if (world.character.isFalling()) {
-          this.handleStompCollision(world, enemy);
-        } else {
-          this.handleSideCollision(world);
-        }
+      if (
+        world.character.isColliding(enemy) &&
+        (world.character.speedY < 0 || world.character.wasFalling)
+      ) {
+        this.handleStompCollision(world, enemy);
+      } else if (world.character.isColliding(enemy)) {
+        this.handleSideCollision(world);
       }
     }
   }
@@ -52,7 +53,7 @@ class CollisionUtils {
    * @param {World} world - The game world instance
    */
   setCharacterBounce(world) {
-    if (world.character.speedY > 0) {
+    if (world.character.speedY < 0) {
       world.character.speedY = -5;
     }
   }

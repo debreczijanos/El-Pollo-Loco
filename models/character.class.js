@@ -12,8 +12,6 @@ class Character extends MovableObject {
   speed = 5;
   /** @type {number} Number of bottles collected by the character */
   collectedBottles = 0;
-  /** @type {boolean} Flag indicating if the character just stomped an enemy */
-  justStomped = false;
   /** @type {boolean} Indicates if the jump animation is currently active */
   isJumpingAnimationActive = false;
 
@@ -96,12 +94,14 @@ class Character extends MovableObject {
   isWalkingSoundPlaying = false;
   /** @type {boolean} Flag indicating if hurt sound has been played */
   hasPlayedHurtSound = false;
-
   /** @type {object} Hitbox for the character */
   hitbox = { top: 130, bottom: 0, left: 30, right: 30 };
-
   /** @type {boolean} Flag indicating if the character is invulnerable after stomping */
   stompInvulnerable = false;
+  /** @type {boolean} Flag indicating if the character is falling */
+  wasFalling = false;
+  /** @type {number} Counter for the falling state */
+  wasFallingCounter = 0;
 
   /**
    * Creates a new Character instance.
@@ -380,6 +380,28 @@ class Character extends MovableObject {
    * Gibt true zurück, wenn der Charakter nach unten fällt.
    */
   isFalling() {
-    return this.speedY > 0;
+    return this.speedY < 0;
+  }
+
+  /**
+   * Applies gravity to the character, updates the vertical position,
+   * handles ground collision, and manages the wasFalling flag for stomp logic.
+   * The wasFalling flag remains true for a few frames after falling to allow
+   * correct stomp detection even if collision is detected slightly after landing.
+   */
+  applyGravity() {
+    setInterval(() => {
+      this.updateVerticalPosition();
+      this.handleGroundCollision();
+      if (this.speedY < 0) {
+        this.wasFalling = true;
+        this.wasFallingCounter = 8;
+      } else if (this.wasFallingCounter > 0) {
+        this.wasFallingCounter--;
+        this.wasFalling = true;
+      } else {
+        this.wasFalling = false;
+      }
+    }, 1000 / 60);
   }
 }
