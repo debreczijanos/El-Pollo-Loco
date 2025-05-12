@@ -88,6 +88,12 @@ class World {
   bottleThrowBlocked = false;
 
   /**
+   * The cooldown for throwing bottles.
+   * @type {number}
+   */
+  bottleThrowCooldown = 0;
+
+  /**
    * Creates a new game world.
    * @param {HTMLCanvasElement} canvas - The canvas element for graphics
    * @param {Keyboard} keyboard - The keyboard input
@@ -303,13 +309,16 @@ class World {
    * Checks if the throw key is pressed and a bottle is available, then throws one bottle per key press.
    */
   handleBottleThrowInput() {
+    const now = Date.now();
     if (
       this.keyboard.D &&
       this.character.collectedBottles > 0 &&
-      !this.bottleThrowBlocked
+      !this.bottleThrowBlocked &&
+      now - this.bottleThrowCooldown > 1500
     ) {
       this.throwBottle();
       this.bottleThrowBlocked = true;
+      this.bottleThrowCooldown = now;
     }
   }
 

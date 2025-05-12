@@ -156,4 +156,47 @@ class EndbossMovement {
     }
     return false;
   }
+
+  /**
+   * Makes the endboss follow the character at normal or boosted speed.
+   * Used during the chase phase (30-50% energy).
+   * Speed is increased when energy is below 80%.
+   * @param {Endboss} endboss
+   */
+  followCharacter(endboss) {
+    const char = endboss.world.character;
+    endboss.playAnimation(endboss.IMAGES_WALKING);
+    const speed = endboss.speedBoost
+      ? endboss.baseSpeed * 4
+      : endboss.baseSpeed;
+    if (char.x > endboss.x) {
+      endboss.x += speed;
+      endboss.otherDirection = true;
+      endboss.directionLeft = false;
+    } else {
+      endboss.x -= speed;
+      endboss.otherDirection = false;
+      endboss.directionLeft = true;
+    }
+  }
+
+  /**
+   * Makes the endboss follow the character at maximum speed.
+   * Used during the aggressive phase.
+   * @param {Endboss} endboss
+   */
+  aggressiveFollow(endboss) {
+    const char = endboss.world.character;
+    endboss.playAnimation(endboss.IMAGES_WALKING);
+    const speed = endboss.baseSpeed * 8;
+    if (char.x > endboss.x) {
+      endboss.x += speed;
+      endboss.otherDirection = true;
+      endboss.directionLeft = false;
+    } else {
+      endboss.x -= speed;
+      endboss.otherDirection = false;
+      endboss.directionLeft = true;
+    }
+  }
 }

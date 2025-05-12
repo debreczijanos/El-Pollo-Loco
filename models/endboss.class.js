@@ -131,6 +131,7 @@ class Endboss extends MovableObject {
     this.baseSpeed = 3;
     this.animations = new EndbossAnimations();
     this.movement = new EndbossMovement();
+    this.hasHealedSinceLastHit = false;
     this.animate();
   }
 
@@ -144,6 +145,7 @@ class Endboss extends MovableObject {
     this.applyDamage();
     this.checkDeathState();
     this.updateStatusBar();
+    this.hasHealedSinceLastHit = false;
   }
 
   /**
@@ -232,6 +234,7 @@ class Endboss extends MovableObject {
     const char = this.world.character;
     this.speedBoost = this.energy < 80;
     this.handleBehaviorBasedOnEnergy(char);
+    this.checkHealing();
   }
 
   /**
@@ -257,7 +260,7 @@ class Endboss extends MovableObject {
     if (this.shouldAttack(char)) {
       this.prepareAttack();
     } else {
-      this.aggressiveFollow();
+      this.movement.aggressiveFollow(this);
     }
   }
 
@@ -270,7 +273,7 @@ class Endboss extends MovableObject {
     if (this.shouldAttack(char)) {
       this.prepareAttack();
     } else {
-      this.followCharacter();
+      this.movement.followCharacter(this);
     }
   }
 
@@ -284,45 +287,6 @@ class Endboss extends MovableObject {
       this.prepareAttack();
     } else if (this.shouldMove()) {
       this.move();
-    }
-  }
-
-  /**
-   * Makes the endboss follow the character at maximum speed.
-   * Used during the aggressive phase.
-   */
-  aggressiveFollow() {
-    const char = this.world.character;
-    this.playAnimation(this.IMAGES_WALKING);
-    const speed = this.baseSpeed * 8;
-    if (char.x > this.x) {
-      this.x += speed;
-      this.otherDirection = true;
-      this.directionLeft = false;
-    } else {
-      this.x -= speed;
-      this.otherDirection = false;
-      this.directionLeft = true;
-    }
-  }
-
-  /**
-   * Makes the endboss follow the character at normal or boosted speed.
-   * Used during the chase phase (30-50% energy).
-   * Speed is increased when energy is below 80%.
-   */
-  followCharacter() {
-    const char = this.world.character;
-    this.playAnimation(this.IMAGES_WALKING);
-    const speed = this.speedBoost ? this.baseSpeed * 4 : this.baseSpeed;
-    if (char.x > this.x) {
-      this.x += speed;
-      this.otherDirection = true;
-      this.directionLeft = false;
-    } else {
-      this.x -= speed;
-      this.otherDirection = false;
-      this.directionLeft = true;
     }
   }
 
@@ -410,5 +374,23 @@ class Endboss extends MovableObject {
       !this.world.character.isDead() &&
       !this.otherDirection
     );
+  }
+
+  /**
+   * Checks if the endboss should heal after 2 seconds without being hit.
+   * If the last hit was more than 2 seconds ago and the endboss hasn't healed since then,
+   * it increases its energy by 20 points (up to a maximum of 100) and updates the status bar.
+   */
+  checkHealing() {
+    const now = new Date().getTime();
+    if (
+      this.lastHit &&
+      now - this.lastHit > 2000 &&
+      !this.hasHealedSinceLastHit
+    ) {
+      this.energy = Math.min(this.energy + 20, 100);
+      this.hasHealedSinceLastHit = true;
+      this.updateStatusBar();
+    }
   }
 }
